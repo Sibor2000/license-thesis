@@ -1,9 +1,20 @@
+from mgts.microgrid import Microgrid
+
+###
+# You might get inconsistencies if you call get_current_moment outside step time
+###
 class MicrogridNetwork:
-    def __init__(self, microgrids=[]):
-        self.microgrids = microgrids
+    def __init__(self, microgrids:list[Microgrid]=None):
+        self.microgrids = microgrids if microgrids else []
+
+    def get_current_moment(self):
+        return len(self.microgrids[0].stored_energy)
 
     def conduct_internal_energy(self):
-        pass
+        time = self.get_current_moment()
+        for microgrid in self.microgrids:
+            microgrid.calculate_stored_energy(time)
+
 
     def conduct_trade(self):
         pass
