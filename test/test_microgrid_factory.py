@@ -25,7 +25,7 @@ def test_create_from_file():
 
     microgrids = mgf.create_from_file()
 
-    assert len(microgrids) == 2
+    assert len(microgrids) == 3
     assert microgrids[0].id == "MG1"
     assert microgrids[0].charge_efficiency == 0.8
     assert microgrids[0].initial_stored_energy == 0

@@ -29,7 +29,7 @@ class MicrogridFactory:
 
         return MicrogridFactory.create_from_dataframe(df, microgrid_id=microgrid_id, produced_energy_column=produced_energy_column, consumed_energy_column=consumed_energy_column)
 
-    def create_from_file(self, microgrid_statcard = "MG stats",microgrid_id_column="id", charge_efficiency_column = "charge_efficiency", discharge_efficiency_column = "discharge_efficiency",initial_stored_energy_column = "initial_stored_energy", produced_energy_column="produce", consumed_energy_column="consume") -> list[Microgrid]:
+    def create_from_file(self, microgrid_statcard = "MG stats",microgrid_id_column="id", charge_efficiency_column = "charge_efficiency", discharge_efficiency_column = "discharge_efficiency",initial_stored_energy_column = "initial_stored_energy", max_stored_energy_column = "max_stored_energy",produced_energy_column="produce", consumed_energy_column="consume") -> list[Microgrid]:
         sheets = pd.read_excel(self.path, sheet_name=None)
         statcard = pd.read_excel(self.path, sheet_name=microgrid_statcard)
 
@@ -40,6 +40,7 @@ class MicrogridFactory:
             microgrid.charge_efficiency = row[charge_efficiency_column]
             microgrid.discharge_efficiency = row[discharge_efficiency_column]
             microgrid.initial_stored_energy = row[initial_stored_energy_column]
+            microgrid.max_stored_energy = row[max_stored_energy_column]
             microgrids.append(microgrid)
 
         return microgrids

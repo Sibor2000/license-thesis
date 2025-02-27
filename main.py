@@ -1,14 +1,16 @@
-from mgts.microgrid import MicrogridFactory
+from mgts.microgrid import MicrogridFactory, MicrogridNetworkFactory
 import pandas as pd
 
 path = "./datasets/test.xlsx"
 sheet_name="MG1 measurements"
 
-mgf = MicrogridFactory(path=path)
+mgn = MicrogridNetworkFactory.create_from_file(path=path)
 
-microgrids = mgf.create_from_file()
+mgn.step_time()
+mgn.step_time()
+mgn.step_time()
+mgn.step_time()
 
-for microgrid in microgrids:
-    print(microgrid.id)
-    print(microgrid.charge_efficiency)
-    print(microgrid.produced_energy)
+
+print(mgn.microgrids[2].stored_energy)
+print(mgn.desires)
