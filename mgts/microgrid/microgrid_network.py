@@ -36,6 +36,8 @@ class MicrogridNetwork:
                 state_of_market[3] + desire[3],
             )
 
+        print(desires)
+
         hard_delta = state_of_market[3] - state_of_market[0]  # buy-sell
 
         if hard_delta < 0:
@@ -137,7 +139,8 @@ class MicrogridNetwork:
                 self.microgrids[i].energy_transact(amount=amount, t=self.__time)
 
     def conduct_post_trade_energy(self):
-        pass
+        for microgrid in self.microgrids:
+            microgrid.resolve_trade(t=self.__time)
 
     def conduct_threshold_adjustment(self):
         pass

@@ -1,4 +1,4 @@
-from mgts.simulation.constants import CHARGE_TIME_WINDOW
+from mgts.simulation.constants import CHARGE_TIME_WINDOW, FLOAT_ROUNDING_DECIMALS
 
 
 class Microgrid:
@@ -13,10 +13,10 @@ class Microgrid:
         stored_energy_post_trade: list = None,
         consumed_energy: list = None,
         produced_energy: list = None,
-        sell_threshold=50.0,
-        soft_sell_threshold=15.0,
-        buy_threshold=5.0,
-        soft_buy_threshold=25.0,
+        sell_threshold=100.0,
+        soft_sell_threshold=100.0,
+        buy_threshold=0.0,
+        soft_buy_threshold=0.0,
         battery_operations: list = None,
     ):
         self.id = id
@@ -44,6 +44,9 @@ class Microgrid:
         self.soft_buy_threshold = soft_buy_threshold
         self.buy_threshold = buy_threshold
 
+        #! Misc internal fields
+        self.__transient_energy = 0
+
     def state(self, t):
         return self.produced_energy[t] + self.stored_energy[t] - self.consumed_energy[t]
 
@@ -59,13 +62,15 @@ class Microgrid:
         if delta_energy > 0:  # charge
             next_stored = previous_energy + self.charge_efficiency * delta_energy
             self.stored_energy.append(
-                min(self.max_stored_energy, next_stored)
+                round(min(self.max_stored_energy, next_stored), FLOAT_ROUNDING_DECIMALS)
             )  #!overcharge
         elif delta_energy < 0:  # discharge
             next_stored = previous_energy - (1 / self.discharge_efficiency) * abs(
                 delta_energy
             )
-            self.stored_energy.append(max(0, next_stored))  #!undercharge
+            self.stored_energy.append(
+                round(max(0, next_stored), FLOAT_ROUNDING_DECIMALS)
+            )  #!undercharge
         else:
             self.stored_energy.append(previous_energy)
 
@@ -112,23 +117,39 @@ class Microgrid:
             max(0, self.buy_threshold - battery_percent) / 100
         ) * self.max_stored_energy
         soft_buy_desire_raw = (
-            max(0, self.soft_buy_threshold + buy_desire_raw - battery_percent) / 100
+            max(0, self.soft_buy_threshold - buy_desire_raw - battery_percent) / 100
         ) * self.max_stored_energy
 
-        sell_desire = sell_desire_raw * self.discharge_efficiency
-        soft_sell_desire = soft_sell_desire_raw * self.discharge_efficiency
-        buy_desire = buy_desire_raw * (1.0 / self.charge_efficiency)
-        soft_buy_desire = soft_buy_desire_raw * (1.0 / self.charge_efficiency)
+        sell_desire = round(
+            sell_desire_raw * self.discharge_efficiency, FLOAT_ROUNDING_DECIMALS
+        )
+        soft_sell_desire = round(
+            soft_sell_desire_raw * self.discharge_efficiency, FLOAT_ROUNDING_DECIMALS
+        )
+        buy_desire = round(
+            buy_desire_raw * (1.0 / self.charge_efficiency), FLOAT_ROUNDING_DECIMALS
+        )
+        soft_buy_desire = round(
+            soft_buy_desire_raw * (1.0 / self.charge_efficiency),
+            FLOAT_ROUNDING_DECIMALS,
+        )
 
         return (sell_desire, soft_sell_desire, soft_buy_desire, buy_desire)
 
     def energy_transact(self, amount, t):
 
-        new_amount = self.stored_energy[t]
+        # new_amount = self.stored_energy[t]
 
         if amount > 0:
-            new_amount += amount * self.charge_efficiency
+            # new_amount += amount * self.charge_efficiency
+            self.__transient_energy += amount * self.charge_efficiency
         elif amount < 0:
-            new_amount += amount * (1 / self.discharge_efficiency)
+            # new_amount += amount * (1 / self.discharge_efficiency)
+            self.__transient_energy += amount * (1 / self.discharge_efficiency)
 
-        self.stored_energy_post_trade.append(new_amount)
+    def resolve_trade(self, t):
+        self.stored_energy_post_trade.append(
+            round(
+                self.stored_energy[t] + self.__transient_energy, FLOAT_ROUNDING_DECIMALS
+            )
+        )

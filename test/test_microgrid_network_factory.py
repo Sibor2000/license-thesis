@@ -6,7 +6,7 @@ def test_create_from_file():
     microgrid_network = MicrogridNetworkFactory.create_from_file(path=path)
     microgrids = microgrid_network.microgrids
 
-    assert len(microgrids) == 3
+    assert len(microgrids) == 4
     assert microgrids[0].id == "MG1"
     assert microgrids[0].charge_efficiency == 0.8
     assert microgrids[0].initial_stored_energy == 0
