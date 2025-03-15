@@ -8,21 +8,17 @@ def test_frequency():
 
 def test_thresholds():
     #base case 1: regular thresholds
-    micro = Microgrid(1, buy_threshold=10, soft_buy_threshold=20, sell_threshold=80, soft_sell_threshold=70)
+    micro = Microgrid(1, buy_threshold=10, sell_threshold=80)
     assert micro.is_valid_thresholds()
 
     #base case 2: all thresholds equal
-    micro = Microgrid(1, buy_threshold=50, soft_buy_threshold=50, sell_threshold=50, soft_sell_threshold=50)
-    assert micro.is_valid_thresholds()
-
-    #base case 3: regular thresholds, but soft thresholds are overlapping
-    micro = Microgrid(1, buy_threshold=10, soft_buy_threshold=70, sell_threshold=80, soft_sell_threshold=20)
+    micro = Microgrid(1, buy_threshold=50, sell_threshold=50)
     assert micro.is_valid_thresholds()
 
     #invalid case 1: sell and buy have invalid values
-    micro = Microgrid(1, buy_threshold=-1, soft_buy_threshold=70, sell_threshold=101, soft_sell_threshold=20)
+    micro = Microgrid(1, buy_threshold=-1, sell_threshold=101)
     assert not(micro.is_valid_thresholds())
 
-    #invalid case 2: soft thresholds have wrong values
-    micro = Microgrid(1, buy_threshold=10, soft_buy_threshold=5, sell_threshold=80, soft_sell_threshold=85)
+    #invalid case 2: thresholds are swapped
+    micro = Microgrid(1, buy_threshold=80, sell_threshold=10)
     assert not(micro.is_valid_thresholds())

@@ -1,4 +1,5 @@
 from mgts.simulation.constants import CHARGE_TIME_WINDOW, FLOAT_ROUNDING_DECIMALS
+from mgts.behavior import Role
 
 
 class Microgrid:
@@ -9,14 +10,14 @@ class Microgrid:
         charge_efficiency=1.0,
         discharge_efficiency=1.0,
         initial_stored_energy=0.0,
+        battery_lifetime_cycles=100,
         stored_energy: list = None,
         stored_energy_post_trade: list = None,
         consumed_energy: list = None,
         produced_energy: list = None,
         sell_threshold=100.0,
-        soft_sell_threshold=100.0,
         buy_threshold=0.0,
-        soft_buy_threshold=0.0,
+        role=Role.DOVE,
         battery_operations: list = None,
     ):
         self.id = id
@@ -26,6 +27,7 @@ class Microgrid:
         self.discharge_efficiency = discharge_efficiency
         self.max_stored_energy = max_stored_energy
         self.initial_stored_energy = initial_stored_energy
+        self.battery_lifetime_cycles = battery_lifetime_cycles
         # each of these fields is an array,
         # that holds the value in the given moment t
         # Since Python shares object across multiple instances of a class, if defined as a default value, inner initialization is used.
@@ -40,9 +42,8 @@ class Microgrid:
 
         #! Behavior related fields
         self.sell_threshold = sell_threshold
-        self.soft_sell_threshold = soft_sell_threshold
-        self.soft_buy_threshold = soft_buy_threshold
         self.buy_threshold = buy_threshold
+        self.role = role
 
         #! Misc internal fields
         self.__transient_energy = 0
@@ -88,10 +89,6 @@ class Microgrid:
                 0 <= self.sell_threshold,  # sell
                 self.sell_threshold <= 100,
                 self.buy_threshold <= self.sell_threshold,  # buy and sell
-                self.buy_threshold <= self.soft_buy_threshold,  # soft buy
-                self.soft_buy_threshold <= self.sell_threshold,
-                self.buy_threshold <= self.soft_sell_threshold,  # soft sell
-                self.soft_sell_threshold <= self.sell_threshold,
             )
         )
 
@@ -106,35 +103,36 @@ class Microgrid:
         battery_percent = (self.stored_energy[t] / self.max_stored_energy) * 100
 
         # These desires are amounts of electricity that the other party sees, as battery efficiency affects chargin/discharging
-        sell_desire_raw = (
-            max(0, battery_percent - self.sell_threshold) / 100
-        ) * self.max_stored_energy
-        soft_sell_desire_raw = (
-            max(0, battery_percent - sell_desire_raw - self.soft_sell_threshold) / 100
-        ) * self.max_stored_energy
 
-        buy_desire_raw = (
-            max(0, self.buy_threshold - battery_percent) / 100
-        ) * self.max_stored_energy
-        soft_buy_desire_raw = (
-            max(0, self.soft_buy_threshold - buy_desire_raw - battery_percent) / 100
-        ) * self.max_stored_energy
+        sell_desire_raw = 0
+        buy_desire_raw = 0
+
+        if self.role == Role.HAWK:
+            sell_desire_raw = (
+                max(0, battery_percent - self.sell_threshold) / 100
+            ) * self.max_stored_energy
+
+            buy_desire_raw = (
+                max(0, self.buy_threshold - battery_percent) / 100
+            ) * self.max_stored_energy
+
+        elif self.role == Role.DOVE:
+            sell_desire_raw = (
+                max(0, battery_percent - self.buy_threshold) / 100
+            ) * self.max_stored_energy
+
+            buy_desire_raw = (
+                max(0, self.sell_threshold - battery_percent) / 100
+            ) * self.max_stored_energy
 
         sell_desire = round(
             sell_desire_raw * self.discharge_efficiency, FLOAT_ROUNDING_DECIMALS
         )
-        soft_sell_desire = round(
-            soft_sell_desire_raw * self.discharge_efficiency, FLOAT_ROUNDING_DECIMALS
-        )
         buy_desire = round(
             buy_desire_raw * (1.0 / self.charge_efficiency), FLOAT_ROUNDING_DECIMALS
         )
-        soft_buy_desire = round(
-            soft_buy_desire_raw * (1.0 / self.charge_efficiency),
-            FLOAT_ROUNDING_DECIMALS,
-        )
 
-        return (sell_desire, soft_sell_desire, soft_buy_desire, buy_desire)
+        return (sell_desire, buy_desire)
 
     def energy_transact(self, amount, t):
 
@@ -153,3 +151,19 @@ class Microgrid:
                 self.stored_energy[t] + self.__transient_energy, FLOAT_ROUNDING_DECIMALS
             )
         )
+
+    def cost_battery(self, t):
+        pass
+
+    def cost_strategy(self, t):
+        pass
+
+    def cost_overhead(self, t):
+        pass
+
+    def calculate_cost(self, t):
+
+        if self.stored_energy[t] == self.stored_energy_post_trade[t]:
+            pass
+        else:
+            self.cost_battery() + self.cost_strategy() + self.cost_overhead()
