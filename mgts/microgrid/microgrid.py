@@ -1,4 +1,10 @@
-from mgts.simulation.constants import CHARGE_TIME_WINDOW, FLOAT_ROUNDING_DECIMALS
+from mgts.simulation.constants import (
+    CHARGE_TIME_WINDOW,
+    FLOAT_ROUNDING_DECIMALS,
+    DEFAULT_SELL_THRESHOLD,
+    DEFAULT_BUY_THRESHOLD,
+    E_MAX_LINES
+)
 from mgts.behavior import Role
 
 
@@ -15,8 +21,8 @@ class Microgrid:
         stored_energy_post_trade: list = None,
         consumed_energy: list = None,
         produced_energy: list = None,
-        sell_threshold=100.0,
-        buy_threshold=0.0,
+        sell_threshold=DEFAULT_SELL_THRESHOLD,
+        buy_threshold=DEFAULT_BUY_THRESHOLD,
         role=Role.DOVE,
         battery_operations: list = None,
     ):
@@ -56,7 +62,6 @@ class Microgrid:
         if t == 0:
             previous_energy = self.initial_stored_energy
         else:
-            # previous_energy = self.stored_energy[t-1]
             previous_energy = self.stored_energy_post_trade[t - 1]
 
         delta_energy = self.produced_energy[t] - self.consumed_energy[t]
@@ -99,13 +104,15 @@ class Microgrid:
             / CHARGE_TIME_WINDOW
         )
 
-    def calculate_tradeable_energy(self, t):
+    def calculate_tradeable_energy(self, t) -> tuple[float, float]:
         battery_percent = (self.stored_energy[t] / self.max_stored_energy) * 100
 
         # These desires are amounts of electricity that the other party sees, as battery efficiency affects chargin/discharging
 
         sell_desire_raw = 0
         buy_desire_raw = 0
+        sell_desire = 0
+        buy_desire = 0
 
         if self.role == Role.HAWK:
             sell_desire_raw = (
@@ -131,6 +138,10 @@ class Microgrid:
         buy_desire = round(
             buy_desire_raw * (1.0 / self.charge_efficiency), FLOAT_ROUNDING_DECIMALS
         )
+
+        if self.role == Role.DOVE:
+            sell_desire = min(sell_desire, E_MAX_LINES)
+            buy_desire = min(buy_desire, E_MAX_LINES)
 
         return (sell_desire, buy_desire)
 
