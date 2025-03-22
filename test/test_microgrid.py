@@ -1,5 +1,6 @@
 from mgts.microgrid import Microgrid
 from mgts.simulation.constants import CHARGE_TIME_WINDOW
+from mgts.behavior import Role
 
 def test_frequency():
     micro = Microgrid(1, battery_operations=range(1, 2*CHARGE_TIME_WINDOW+2))
@@ -22,3 +23,8 @@ def test_thresholds():
     #invalid case 2: thresholds are swapped
     micro = Microgrid(1, buy_threshold=80, sell_threshold=10)
     assert not(micro.is_valid_thresholds())
+
+def test_strategy_cost():
+    micro = Microgrid(1, role=[Role.DOVE]*6+[Role.HAWK]*4+[Role.DOVE]*6+[Role.HAWK]*4)
+
+    assert(micro.cost_strategy(19) == 0.4)

@@ -18,12 +18,12 @@ def test_circumstance_matrix():
 
     microgrid_network.set_new_universal_thresholds(65, 35)
 
-    microgrid_network.microgrids[0].role = Role.DOVE
-    microgrid_network.microgrids[1].role = Role.HAWK
-    microgrid_network.microgrids[2].role = Role.DOVE
-    microgrid_network.microgrids[3].role = Role.HAWK
-    microgrid_network.microgrids[4].role = Role.DOVE
-    microgrid_network.microgrids[5].role = Role.DOVE
+    microgrid_network.microgrids[0].role = [Role.DOVE]
+    microgrid_network.microgrids[1].role = [Role.HAWK]
+    microgrid_network.microgrids[2].role = [Role.DOVE]
+    microgrid_network.microgrids[3].role = [Role.HAWK]
+    microgrid_network.microgrids[4].role = [Role.DOVE]
+    microgrid_network.microgrids[5].role = [Role.DOVE]
 
     microgrid_network.step_time()
 

@@ -23,7 +23,7 @@ class Microgrid:
         produced_energy: list = None,
         sell_threshold=DEFAULT_SELL_THRESHOLD,
         buy_threshold=DEFAULT_BUY_THRESHOLD,
-        role=Role.DOVE,
+        role:list[Role]=[Role.DOVE],
         battery_operations: list = None,
     ):
         self.id = id
@@ -53,6 +53,7 @@ class Microgrid:
 
         #! Misc internal fields
         self.__transient_energy = 0
+        self.E_MAX_LINES = E_MAX_LINES
 
     def state(self, t):
         return self.produced_energy[t] + self.stored_energy[t] - self.consumed_energy[t]
@@ -70,6 +71,7 @@ class Microgrid:
             self.stored_energy.append(
                 round(min(self.max_stored_energy, next_stored), FLOAT_ROUNDING_DECIMALS)
             )  #!overcharge
+            self.battery_operations.append(1)
         elif delta_energy < 0:  # discharge
             next_stored = previous_energy - (1 / self.discharge_efficiency) * abs(
                 delta_energy
@@ -77,8 +79,10 @@ class Microgrid:
             self.stored_energy.append(
                 round(max(0, next_stored), FLOAT_ROUNDING_DECIMALS)
             )  #!undercharge
+            self.battery_operations.append(1)
         else:
             self.stored_energy.append(previous_energy)
+            self.battery_operations.append(0)
 
     def is_stable(self, t):
         return (
@@ -97,10 +101,13 @@ class Microgrid:
             )
         )
 
+    def timeframe_battery_operations(self, t, p=CHARGE_TIME_WINDOW):
+        start = max(0, t - p)
+        return sum(self.battery_operations[i] for i in range(start, t + 1))
+
     def calculate_charge_frequency(self, t):
-        start = max(0, t - CHARGE_TIME_WINDOW)
         return (
-            sum(self.battery_operations[i] for i in range(start, t + 1))
+            self.timeframe_battery_operations(t)
             / CHARGE_TIME_WINDOW
         )
 
@@ -114,7 +121,7 @@ class Microgrid:
         sell_desire = 0
         buy_desire = 0
 
-        if self.role == Role.HAWK:
+        if self.role[t] == Role.HAWK:
             sell_desire_raw = (
                 max(0, battery_percent - self.sell_threshold) / 100
             ) * self.max_stored_energy
@@ -123,7 +130,7 @@ class Microgrid:
                 max(0, self.buy_threshold - battery_percent) / 100
             ) * self.max_stored_energy
 
-        elif self.role == Role.DOVE:
+        elif self.role[t] == Role.DOVE:
             sell_desire_raw = (
                 max(0, battery_percent - self.buy_threshold) / 100
             ) * self.max_stored_energy
@@ -139,9 +146,9 @@ class Microgrid:
             buy_desire_raw * (1.0 / self.charge_efficiency), FLOAT_ROUNDING_DECIMALS
         )
 
-        if self.role == Role.DOVE:
-            sell_desire = min(sell_desire, E_MAX_LINES)
-            buy_desire = min(buy_desire, E_MAX_LINES)
+        if self.role[t] == Role.DOVE:
+            sell_desire = min(sell_desire, self.E_MAX_LINES)
+            buy_desire = min(buy_desire, self.E_MAX_LINES)
 
         return (sell_desire, buy_desire)
 
@@ -163,18 +170,8 @@ class Microgrid:
             )
         )
 
-    def cost_battery(self, t):
-        pass
-
-    def cost_strategy(self, t):
-        pass
-
-    def cost_overhead(self, t):
-        pass
-
-    def calculate_cost(self, t):
-
-        if self.stored_energy[t] == self.stored_energy_post_trade[t]:
-            pass
-        else:
-            self.cost_battery() + self.cost_strategy() + self.cost_overhead()
+    def cost_strategy(self, t:int):
+        #TODO: change
+        if self.role[t] == Role.HAWK:
+            return 1.0 * self.role.count(Role.HAWK) / len(self.role)
+        return 0
