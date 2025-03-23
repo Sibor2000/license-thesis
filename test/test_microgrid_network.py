@@ -8,7 +8,9 @@ def test_get_current_moment():
 
     microgrid_network = MicrogridNetworkFactory.create_from_file(path=path)
     assert microgrid_network.get_current_moment() == 0
-    microgrid_network.step_time()
+    #partial step time
+    microgrid_network.conduct_internal_energy()
+    microgrid_network.update_current_moment()
     assert microgrid_network.get_current_moment() == 1
 
 
@@ -25,7 +27,9 @@ def test_circumstance_matrix():
     microgrid_network.microgrids[4].role = [Role.DOVE]
     microgrid_network.microgrids[5].role = [Role.DOVE]
 
-    microgrid_network.step_time()
+    #partial step time
+    microgrid_network.conduct_internal_energy()
+    microgrid_network.calculate_circumstance_matrix()
 
     expected_matrix = np.array(
         [
@@ -38,4 +42,4 @@ def test_circumstance_matrix():
         ]
     )
 
-    assert np.array_equal(expected_matrix, microgrid_network.circumstande_matrices[0])
+    assert np.array_equal(expected_matrix, microgrid_network.circumstance_matrices[0])

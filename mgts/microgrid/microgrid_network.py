@@ -98,6 +98,43 @@ class MicrogridNetwork:
 
         return battery_cost
 
+    def stabilisation_bonus(self, outcome)->float:
+        #TODO: test if we actually become stable after a theoretical trade
+        outcome_t = np.transpose(outcome)
+
+        no_initally_unstable = 0
+        no_stabilised = 0
+        no_destabilised = 0
+
+        for i, microgrid in enumerate(self.microgrids):
+
+
+            sold = 0
+            bought = 0
+            for j in range(0, len(self.microgrids)):
+                #transacted = transacted + outcome_t[i][j] - outcome[i][j]
+                sold += outcome[i][j]
+                bought += outcome_t[i][j]
+
+            stable_post_trade = microgrid.is_energy_stabilising(self.__time, (sold, bought))
+
+            if microgrid.is_stable(self.__time):
+                if not(stable_post_trade):
+                    no_destabilised += 1
+            else:
+                no_initally_unstable +=1
+                if stable_post_trade:
+                    no_stabilised +=1
+
+        return no_destabilised*100
+
+        if no_initally_unstable == 0 and no_destabilised > 0:
+            #actually impossible
+            return -100
+
+        return float(no_stabilised - no_destabilised)/no_initally_unstable
+
+
 
     def evaluate_trade(self, solution):
 
@@ -112,9 +149,11 @@ class MicrogridNetwork:
         total_overhead_cost = self.total_overhead_cost(outcome=outcome)
         total_battery_cost = self.total_battery_cost(outcome=outcome)
 
+        stabilisation_bonus = self.stabilisation_bonus(outcome=outcome)
+
         final_cost = total_strategy_cost + total_overhead_cost + total_battery_cost
 
-        return -final_cost
+        return stabilisation_bonus-final_cost
 
     def find_optimal_trade(self):
         problem_dict = {

@@ -3,7 +3,7 @@ from mgts.simulation.constants import (
     FLOAT_ROUNDING_DECIMALS,
     DEFAULT_SELL_THRESHOLD,
     DEFAULT_BUY_THRESHOLD,
-    E_MAX_LINES
+    E_MAX_LINES,
 )
 from mgts.behavior import Role
 
@@ -23,7 +23,7 @@ class Microgrid:
         produced_energy: list = None,
         sell_threshold=DEFAULT_SELL_THRESHOLD,
         buy_threshold=DEFAULT_BUY_THRESHOLD,
-        role:list[Role]=[Role.DOVE],
+        role: list[Role] = [Role.DOVE],
         battery_operations: list = None,
     ):
         self.id = id
@@ -73,7 +73,7 @@ class Microgrid:
             )  #!overcharge
             self.battery_operations.append(1)
         elif delta_energy < 0:  # discharge
-            next_stored = previous_energy - (1 / self.discharge_efficiency) * abs(
+            next_stored = previous_energy - (1.0 / self.discharge_efficiency) * abs(
                 delta_energy
             )
             self.stored_energy.append(
@@ -85,10 +85,31 @@ class Microgrid:
             self.battery_operations.append(0)
 
     def is_stable(self, t):
-        return (
-            self.produced_energy[t] - self.consumed_energy[t] + self.stored_energy[t]
-            >= 0
+        check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
+
+        if (
+            self.buy_threshold <= check_level
+            and check_level <= self.sell_threshold
+        ):
+            return True
+
+        return False
+
+    # check whether a traded amount stabilises the MG
+    def is_energy_stabilising(self, t, sell_buy_amount: tuple[float, float]):
+        upper_stability_bound = 1.0 * self.sell_threshold * self.max_stored_energy / 100
+        lower_stability_bound = 1.0 * self.buy_threshold * self.max_stored_energy / 100
+
+        new_level = (
+            self.stored_energy[t]
+            - (1.0/self.discharge_efficiency) * sell_buy_amount[0]
+            + self.charge_efficiency * sell_buy_amount[1]
         )
+
+        if lower_stability_bound <= new_level and new_level <= upper_stability_bound:
+            return True
+
+        return False
 
     def is_valid_thresholds(self):
         return all(
@@ -106,10 +127,7 @@ class Microgrid:
         return sum(self.battery_operations[i] for i in range(start, t + 1))
 
     def calculate_charge_frequency(self, t):
-        return (
-            self.timeframe_battery_operations(t)
-            / CHARGE_TIME_WINDOW
-        )
+        return self.timeframe_battery_operations(t) / CHARGE_TIME_WINDOW
 
     def calculate_tradeable_energy(self, t) -> tuple[float, float]:
         battery_percent = (self.stored_energy[t] / self.max_stored_energy) * 100
@@ -152,17 +170,6 @@ class Microgrid:
 
         return (sell_desire, buy_desire)
 
-    def energy_transact(self, amount, t):
-
-        # new_amount = self.stored_energy[t]
-
-        if amount > 0:
-            # new_amount += amount * self.charge_efficiency
-            self.__transient_energy += amount * self.charge_efficiency
-        elif amount < 0:
-            # new_amount += amount * (1 / self.discharge_efficiency)
-            self.__transient_energy += amount * (1 / self.discharge_efficiency)
-
     def resolve_trade(self, t):
         self.stored_energy_post_trade.append(
             round(
@@ -170,8 +177,8 @@ class Microgrid:
             )
         )
 
-    def cost_strategy(self, t:int):
-        #TODO: change
+    def cost_strategy(self, t: int):
+        # TODO: change
         if self.role[t] == Role.HAWK:
             return 1.0 * self.role.count(Role.HAWK) / len(self.role)
         return 0
