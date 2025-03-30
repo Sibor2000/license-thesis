@@ -3,7 +3,6 @@ from mgts.microgrid import Microgrid
 import pandas as pd
 from typing_extensions import List
 
-
 class MicrogridFactory:
     def __init__(self, path=None):
         self.path = path

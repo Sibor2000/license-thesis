@@ -1,4 +1,5 @@
 from mgts.microgrid import Microgrid
+from mgts.microgrid import Trade
 from mealpy.evolutionary_based import GA
 from mealpy.utils.problem import Problem
 from mealpy import FloatVar
@@ -17,7 +18,9 @@ class MicrogridNetwork:
         self.microgrids = microgrids if microgrids else []
         self.__time = 0
 
-        self.circumstance_matrices = []
+        self.circumstance_arrays: list[list[Trade]] = []
+        self.desires = []
+        self.decision_arrays = []
 
         self.E_MAX_LINES = E_MAX_LINES
 
@@ -36,34 +39,33 @@ class MicrogridNetwork:
             microgrid.sell_threshold = sell_threshold
             microgrid.buy_threshold = buy_threshold
 
-    def calculate_circumstance_matrix(self):
+    def calculate_circumstance_array(self):
 
         desires = [
             microgrid.calculate_tradeable_energy(self.__time)
             for microgrid in self.microgrids
         ]
 
-        circumstance_matrix = np.zeros((len(self.microgrids), len(self.microgrids)))
+        circumstance_array = []
 
-        for i, seller_desires in enumerate(desires):
-            for j, buyer_desires in enumerate(desires):
-                if i == j:
-                    continue
-                elif (
-                    seller_desires[0] > 0
-                    and seller_desires[1] > 0
-                    and buyer_desires[0] > 0
-                    and buyer_desires[1] > 0
-                ):
-                    # Stable dove-dove meeting
-                    # TODO: maybe see if they are indeed stable to avoid edge case?
-                    continue
-                else:
-                    circumstance_matrix[i][j] = min(seller_desires[0], buyer_desires[1])
+        for i, i_desires in enumerate(desires):
+            for j, j_desires in enumerate(desires[i + 1 :]):
+                i_to_j = min(i_desires[0], j_desires[1])
+                j_to_i = min(j_desires[0], i_desires[1])
 
-        self.circumstance_matrices.append(circumstance_matrix)
+                if i_to_j > 0 and j_to_i == 0:
+                    circumstance_array.append(
+                        Trade(self.microgrids[i], self.microgrids[j], i_to_j)
+                    )
+                elif j_to_i > 0 and i_to_j == 0:
+                    circumstance_array.append(
+                        Trade(self.microgrids[j], self.microgrids[i], j_to_i)
+                    )
 
-    def total_strategy_cost(self)->float:
+        self.circumstance_arrays.append(circumstance_array)
+        self.desires.append(desires)
+
+    def total_strategy_cost(self) -> float:
         total_strategy_cost = 0
         # total_overhead_cost = 0
 
@@ -72,78 +74,89 @@ class MicrogridNetwork:
 
         return total_strategy_cost
 
-    def total_overhead_cost(self, outcome)->float:
+    def total_overhead_cost(self, outcome: list[Trade]) -> float:
 
         total_cost = 0
 
-        for i in range(0, len(self.microgrids)):
-            # total = sold + bought
-            total_traded = np.sum(outcome[i]) + np.sum(np.transpose(outcome)[i])
+        for i, microgrid in enumerate(self.microgrids):
+            total_traded = 0
+            for trade in outcome:
+                if trade.seller is microgrid or trade.buyer is microgrid:
+                    total_traded += trade.amount
 
             if total_traded > self.E_MAX_LINES:
                 total_cost += 1.0 * total_traded / self.E_MAX_LINES
 
         return total_cost
 
-    def total_battery_cost(self, outcome)->float:
-        outcome_t = np.transpose(outcome)
+    def total_battery_cost(self, outcome: list[Trade]) -> float:
         battery_cost = 0
 
         for i, microgrid in enumerate(self.microgrids):
             past_operations = microgrid.timeframe_battery_operations(self.__time)
-            current_operations = np.count_nonzero(outcome[i]) + np.count_nonzero(outcome_t[i])
+            current_operations = sum(
+                1
+                for trade in outcome
+                if trade.buyer is microgrid or trade.seller is microgrid
+            )
             total_operations = past_operations + current_operations
 
             battery_cost += total_operations / microgrid.battery_lifetime_cycles
 
         return battery_cost
 
-    def stabilisation_bonus(self, outcome)->float:
-        #TODO: test if we actually become stable after a theoretical trade
-        outcome_t = np.transpose(outcome)
-
+    def stabilisation_bonus(self, outcome: list[Trade]) -> float:
         no_initally_unstable = 0
         no_stabilised = 0
         no_destabilised = 0
 
+        buyer_penalty = 0
+        seller_penalty = 0
+
         for i, microgrid in enumerate(self.microgrids):
-
-
             sold = 0
             bought = 0
-            for j in range(0, len(self.microgrids)):
-                #transacted = transacted + outcome_t[i][j] - outcome[i][j]
-                sold += outcome[i][j]
-                bought += outcome_t[i][j]
 
-            stable_post_trade = microgrid.is_energy_stabilising(self.__time, (sold, bought))
+            for j, trade in enumerate(outcome):
+                if trade.seller is microgrid:
+                    sold += trade.amount
+                elif trade.buyer is microgrid:
+                    bought += trade.amount
+
+            stable_post_trade = microgrid.is_energy_stabilising(
+                self.__time, (sold, bought)
+            )
 
             if microgrid.is_stable(self.__time):
-                if not(stable_post_trade):
+                if not (stable_post_trade):
                     no_destabilised += 1
+                else:
+                    pass
             else:
-                no_initally_unstable +=1
+                no_initally_unstable += 1
                 if stable_post_trade:
-                    no_stabilised +=1
-
-        return no_destabilised*100
+                    no_stabilised += 1
+                else:
+                    pass
 
         if no_initally_unstable == 0 and no_destabilised > 0:
-            #actually impossible
+            # actually impossible
             return -100
 
-        return float(no_stabilised - no_destabilised)/no_initally_unstable
-
-
+        return (
+            float(no_stabilised - no_destabilised) / no_initally_unstable
+            - buyer_penalty
+            - seller_penalty
+        )
 
     def evaluate_trade(self, solution):
 
-        decision = np.array(solution).reshape(
-            (len(self.microgrids), len(self.microgrids))
-        )
-        circumstance = self.circumstance_matrices[self.__time]
+        decision = np.array(solution)
 
-        outcome = decision * circumstance
+        outcome: list[Trade] = Trade.calculate_outcome(
+            circumstance=self.circumstance_arrays[self.__time],
+            decision=decision,
+        )
 
         total_strategy_cost = self.total_strategy_cost()
         total_overhead_cost = self.total_overhead_cost(outcome=outcome)
@@ -151,36 +164,72 @@ class MicrogridNetwork:
 
         stabilisation_bonus = self.stabilisation_bonus(outcome=outcome)
 
-        final_cost = total_strategy_cost + total_overhead_cost + total_battery_cost
+        final_cost = (
+            total_strategy_cost + total_overhead_cost + total_battery_cost
+        ) / 3.0
 
-        return stabilisation_bonus-final_cost
+        return stabilisation_bonus - final_cost
 
     def find_optimal_trade(self):
         problem_dict = {
             "bounds": FloatVar(
-                lb=[0] * (len(self.microgrids) ** 2),
-                ub=[1] * (len(self.microgrids) ** 2),
+                lb=[0] * (len(self.circumstance_arrays[self.__time])),
+                ub=[1] * (len(self.circumstance_arrays[self.__time])),
             ),
             "obj_func": self.evaluate_trade,
             "minmax": "max",
         }
+
+        print("Circumstance:")
+
+        for trade in self.circumstance_arrays[self.__time]:
+            print(f"s {trade.seller.id}")
+            print(f"b {trade.buyer.id}")
+            print(f"amount {trade.amount}")
 
         model = GA.BaseGA(
             epoch=GA_EPOCH, pop_size=GA_POP_SIZE, pc=GA_CROSSOVER, pm=GA_MUTATION
         )
         model.solve(problem_dict)
 
-        #print("Best solution:")
-        #print(model.g_best.solution)
+        final_decision = np.array(model.g_best.solution)
+        self.decision_arrays.append(final_decision)
 
-        final_decision = np.array(model.g_best.solution).reshape(
-            (len(self.microgrids), len(self.microgrids))
+    def execute_optimal_trade(self):
+
+        decision = np.array(self.decision_arrays[self.__time])
+
+        outcome = Trade.calculate_outcome(
+            circumstance=self.circumstance_arrays[self.__time],
+            decision=decision,
         )
 
-        print(self.circumstance_matrices[self.__time] * final_decision)
+        print("Final outcome:")
+        for trade in outcome:
+            print(f"s {trade.seller.id}")
+            print(f"b {trade.buyer.id}")
+            print(f"amount {trade.amount}")
+
+        for i, microgrid in enumerate(self.microgrids):
+            sell = 0
+            buy = 0
+
+            for j, trade in enumerate(outcome):
+                if microgrid is trade.seller:
+                    sell += trade.amount
+                elif microgrid is trade.buyer:
+                    buy += trade.amount
+
+            microgrid.resolve_trade(self.__time, (sell, buy))
+
+    def calculate_roles(self):
+        for microgrid in self.microgrids:
+            microgrid.calculate_next_role()
 
     def step_time(self):
         self.conduct_internal_energy()  # should be ok
-        self.calculate_circumstance_matrix()
+        self.calculate_circumstance_array()
         self.find_optimal_trade()
+        self.execute_optimal_trade()
+        self.calculate_roles()
         self.update_current_moment()

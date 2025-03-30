@@ -52,7 +52,6 @@ class Microgrid:
         self.role = role
 
         #! Misc internal fields
-        self.__transient_energy = 0
         self.E_MAX_LINES = E_MAX_LINES
 
     def state(self, t):
@@ -87,10 +86,7 @@ class Microgrid:
     def is_stable(self, t):
         check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
 
-        if (
-            self.buy_threshold <= check_level
-            and check_level <= self.sell_threshold
-        ):
+        if self.buy_threshold <= check_level and check_level <= self.sell_threshold:
             return True
 
         return False
@@ -102,7 +98,7 @@ class Microgrid:
 
         new_level = (
             self.stored_energy[t]
-            - (1.0/self.discharge_efficiency) * sell_buy_amount[0]
+            - (1.0 / self.discharge_efficiency) * sell_buy_amount[0]
             + self.charge_efficiency * sell_buy_amount[1]
         )
 
@@ -170,12 +166,19 @@ class Microgrid:
 
         return (sell_desire, buy_desire)
 
-    def resolve_trade(self, t):
+    def resolve_trade(self, t, sell_buy_amount):
         self.stored_energy_post_trade.append(
             round(
-                self.stored_energy[t] + self.__transient_energy, FLOAT_ROUNDING_DECIMALS
+                self.stored_energy[t]
+                - (1.0 / self.discharge_efficiency) * sell_buy_amount[0]
+                + self.charge_efficiency * sell_buy_amount[1],
+                FLOAT_ROUNDING_DECIMALS,
             )
         )
+
+    def calculate_next_role(self):
+        self.role.append(self.role.append(self.role[0]))
+
 
     def cost_strategy(self, t: int):
         # TODO: change
