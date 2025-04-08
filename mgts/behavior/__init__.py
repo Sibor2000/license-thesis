@@ -1,1 +1,1 @@
-from .behavior import Role
+from .behavior import Role, Strategy

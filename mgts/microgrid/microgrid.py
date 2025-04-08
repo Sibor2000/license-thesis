@@ -5,7 +5,7 @@ from mgts.simulation.constants import (
     DEFAULT_BUY_THRESHOLD,
     E_MAX_LINES,
 )
-from mgts.behavior import Role
+from mgts.behavior import Role, Strategy
 
 
 class Microgrid:
@@ -83,13 +83,28 @@ class Microgrid:
             self.stored_energy.append(previous_energy)
             self.battery_operations.append(0)
 
-    def is_stable(self, t):
-        check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
+    def is_stable(self, t, post_trade=False):
+
+        if post_trade:
+            check_level = 100.0 * self.stored_energy_post_trade[t] / self.max_stored_energy
+        else:
+            check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
 
         if self.buy_threshold <= check_level and check_level <= self.sell_threshold:
             return True
 
         return False
+
+
+    def strategy(self, t)->Strategy:
+        check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
+
+        if self.buy_threshold > check_level:
+            return Strategy.BUYER
+        if self.sell_threshold < check_level:
+            return Strategy.SELLER
+
+        return Strategy.STABLE
 
     # check whether a traded amount stabilises the MG
     def is_energy_stabilising(self, t, sell_buy_amount: tuple[float, float]):
@@ -124,6 +139,18 @@ class Microgrid:
 
     def calculate_charge_frequency(self, t):
         return self.timeframe_battery_operations(t) / CHARGE_TIME_WINDOW
+
+    def calculate_battery_percentage(self, t) -> float:
+        if len(self.stored_energy) > 0:
+            return 1.0 * self.stored_energy[t] / self.max_stored_energy
+
+        # return 1.0*self.initial_stored_energy/self.max_stored_energy
+
+    def calculate_initial_battery_percentage(self):
+        return 1.0 * self.initial_stored_energy / self.max_stored_energy
+
+    def calculate_post_trade_battery_percentage(self, t) -> float:
+        return 1.0 * self.stored_energy_post_trade[t] / self.max_stored_energy
 
     def calculate_tradeable_energy(self, t) -> tuple[float, float]:
         battery_percent = (self.stored_energy[t] / self.max_stored_energy) * 100
@@ -168,17 +195,22 @@ class Microgrid:
 
     def resolve_trade(self, t, sell_buy_amount):
         self.stored_energy_post_trade.append(
-            round(
-                self.stored_energy[t]
-                - (1.0 / self.discharge_efficiency) * sell_buy_amount[0]
-                + self.charge_efficiency * sell_buy_amount[1],
-                FLOAT_ROUNDING_DECIMALS,
+            min(
+                self.max_stored_energy,
+                max(
+                    0,
+                    round(
+                        self.stored_energy[t]
+                        - (1.0 / self.discharge_efficiency) * sell_buy_amount[0]
+                        + self.charge_efficiency * sell_buy_amount[1],
+                        FLOAT_ROUNDING_DECIMALS,
+                    ),
+                ),
             )
         )
 
     def calculate_next_role(self):
         self.role.append(self.role.append(self.role[0]))
-
 
     def cost_strategy(self, t: int):
         # TODO: change

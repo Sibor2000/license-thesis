@@ -11,6 +11,11 @@ from mgts.simulation.ga_constants import (
     GA_MUTATION,
 )
 from mgts.simulation.constants import E_MAX_LINES
+import matplotlib.pyplot as plt
+import random
+from mgts.behavior import Role, Strategy
+import mgts.style as styl
+from scipy.optimize import linprog
 
 
 class MicrogridNetwork:
@@ -139,9 +144,15 @@ class MicrogridNetwork:
                 else:
                     pass
 
-        if no_initally_unstable == 0 and no_destabilised > 0:
+            if sold > self.desires[self.__time-1][i][0]:
+                seller_penalty+=100
+
+            if bought > self.desires[self.__time][i][1]:
+                buyer_penalty+=100
+
+        #if no_initally_unstable == 0 and no_destabilised > 0:
             # actually impossible
-            return -100
+            #return -100
 
         return (
             float(no_stabilised - no_destabilised) / no_initally_unstable
@@ -153,10 +164,19 @@ class MicrogridNetwork:
 
         decision = np.array(solution)
 
-        outcome: list[Trade] = Trade.calculate_outcome(
+        #dropout_chance = solution[-1]
+
+        #decision = np.array(
+        #    [x if random.random() >= dropout_chance else 0 for x in solution[:-1]]
+        #)
+
+        outcome_raw: list[Trade] = Trade.calculate_outcome(
             circumstance=self.circumstance_arrays[self.__time],
             decision=decision,
         )
+
+        outcome = self.scale_trades(trades=outcome_raw, desires=self.desires[self.__time])
+        #outcome = scale_trades(trades=outcome_raw, desires=self.desires)
 
         total_strategy_cost = self.total_strategy_cost()
         total_overhead_cost = self.total_overhead_cost(outcome=outcome)
@@ -171,21 +191,22 @@ class MicrogridNetwork:
         return stabilisation_bonus - final_cost
 
     def find_optimal_trade(self):
+
+        possible_trades = len(self.circumstance_arrays[self.__time])
+        print(f"{possible_trades} possible trades")
+
         problem_dict = {
             "bounds": FloatVar(
-                lb=[0] * (len(self.circumstance_arrays[self.__time])),
-                ub=[1] * (len(self.circumstance_arrays[self.__time])),
+                lb=[0] * possible_trades,
+                ub=[1] * possible_trades,
+                #lb=[0] * (possible_trades + 1),
+                #ub=[1] * (possible_trades + 1),
             ),
             "obj_func": self.evaluate_trade,
             "minmax": "max",
         }
 
-        print("Circumstance:")
-
-        for trade in self.circumstance_arrays[self.__time]:
-            print(f"s {trade.seller.id}")
-            print(f"b {trade.buyer.id}")
-            print(f"amount {trade.amount}")
+        print("Modelmaking")
 
         model = GA.BaseGA(
             epoch=GA_EPOCH, pop_size=GA_POP_SIZE, pc=GA_CROSSOVER, pm=GA_MUTATION
@@ -197,18 +218,20 @@ class MicrogridNetwork:
 
     def execute_optimal_trade(self):
 
+        #dropout_rate = self.decision_arrays[self.__time][-1]
+        #decision = np.array(self.decision_arrays[self.__time][:-1])
         decision = np.array(self.decision_arrays[self.__time])
 
-        outcome = Trade.calculate_outcome(
+        #print(decision)
+
+        #print(f"Dropout rate is: {dropout_rate}")
+
+        outcome_raw = Trade.calculate_outcome(
             circumstance=self.circumstance_arrays[self.__time],
             decision=decision,
         )
 
-        print("Final outcome:")
-        for trade in outcome:
-            print(f"s {trade.seller.id}")
-            print(f"b {trade.buyer.id}")
-            print(f"amount {trade.amount}")
+        outcome = self.scale_trades(trades=outcome_raw, desires=self.desires[self.__time])
 
         for i, microgrid in enumerate(self.microgrids):
             sell = 0
@@ -227,9 +250,187 @@ class MicrogridNetwork:
             microgrid.calculate_next_role()
 
     def step_time(self):
-        self.conduct_internal_energy()  # should be ok
+        print("Internal energy calculations")
+        self.conduct_internal_energy()
+        print("Circumstance calculations")
         self.calculate_circumstance_array()
+        print("Trade optimization")
         self.find_optimal_trade()
+        print("Trade execution")
         self.execute_optimal_trade()
+        print("Role calculation")
         self.calculate_roles()
+        print("Time stepping")
         self.update_current_moment()
+
+    def charts_energy_delta(self):
+        initial_energies = [mg.calculate_initial_battery_percentage() for mg in self.microgrids]
+        latest_energies = [mg.calculate_post_trade_battery_percentage(t=(self.__time-1)) for mg in self.microgrids]
+
+        mg_ids = [mg.id for mg in self.microgrids]
+
+        fig, axes = plt.subplots(1,3, figsize=(12,5))
+
+        axes[0].bar(mg_ids, initial_energies, color="yellow")
+        axes[0].set_ylim(0, 1)
+        axes[0].set_title("Initial energies")
+
+        axes[1].bar(mg_ids, latest_energies, color="green")
+        axes[1].set_ylim(0, 1)
+        axes[1].set_title("Post trade energies")
+
+    def charts_role_and_strategy(self, t):
+
+        trade_counts = {
+            (Role.DOVE, Strategy.SELLER) : 0,
+            (Role.DOVE, Strategy.BUYER) : 0,
+            (Role.DOVE, Strategy.STABLE) : 0,
+            (Role.HAWK, Strategy.SELLER) : 0,
+            (Role.HAWK, Strategy.BUYER) : 0,
+            (Role.HAWK, Strategy.STABLE) : 0,
+        }
+
+        for microgrid in self.microgrids:
+            trade_counts[(microgrid.role[t], microgrid.strategy(t=t))] += 1
+
+        #print(trade_counts)
+
+        labels = []
+        amounts = []
+
+        for rs, amount in trade_counts.items():
+            labels.append(rs[0].name + " " + rs[1].name)
+            amounts.append(amount)
+
+        fig = plt.pie(amounts, labels=labels, colors=styl.STRATEGIES_COLOR_ARRAY)
+
+    def charts_stabilities_before_and_after_trade(self, t):
+        stabilities = {
+            "stable_before":0,
+            "unstable_before":0,
+            "stable_after":0,
+            "unstable_after":0
+        }
+
+        for microgrid in self.microgrids:
+
+            if microgrid.is_stable(t):
+                stabilities["stable_before"] +=1
+            else:
+                stabilities["unstable_before"] +=1
+
+            if microgrid.is_stable(t, post_trade=True):
+                stabilities["stable_after"] +=1
+            else:
+                stabilities["unstable_after"] +=1
+
+    def charts_roles_and_strategies_over_time(self):
+        trade_counts = {
+            (Role.DOVE, Strategy.SELLER) : [],
+            (Role.DOVE, Strategy.BUYER) : [],
+            (Role.DOVE, Strategy.STABLE) : [],
+            (Role.HAWK, Strategy.SELLER) : [],
+            (Role.HAWK, Strategy.BUYER) : [],
+            (Role.HAWK, Strategy.STABLE) : [],
+        }
+
+        for t in range(0, self.__time):
+
+            for rs, records in trade_counts.items():
+                records.append(0)
+
+            for mg in self.microgrids:
+                trade_counts[(mg.role[t], mg.strategy(t=t))][t]+=1
+
+        for _, records in trade_counts.items():
+            records = np.array(records)
+
+        print(trade_counts)
+
+        #fig, axes = plt.subplots(1, 1, figsize=(12,5))
+
+        #axes[0].stairs(trade_counts[(Role.DOVE, Strategy.SELLER)])
+        plt.stairs(trade_counts[(Role.DOVE, Strategy.SELLER)])
+
+    def scale_trades(self, trades:list[Trade], desires:list[(float, float)])->list[Trade]:
+        nr_of_mgs = len(desires)
+
+        #print(desires)
+
+        #What fails?
+        #Due to the nature of the linprog maximalizing a row of zeroes sends it crashing
+
+        c= -np.ones(nr_of_mgs)
+
+        A_sell = np.zeros((nr_of_mgs, nr_of_mgs))
+
+        for trade in trades:
+            A_sell[trade.seller.id, trade.buyer.id] = trade.amount
+
+        A_buy = A_sell.transpose()
+
+        b_sell_raw = []
+        b_buy_raw = []
+
+        for desire in desires:
+            b_sell_raw.append(desire[0])
+            b_buy_raw.append(desire[1])
+
+        #Zero row_eliminiation
+        for i in range(nr_of_mgs-1, -1, -1):
+            #sell
+            if not np.any(A_sell[i]):
+                A_sell = np.delete(A_sell, i, axis=0)
+                del b_sell_raw[i]
+                #print("Sell row deleted")
+
+            #buy
+            if not np.any(A_buy[i]):
+                A_buy = np.delete(A_buy, i, axis=0)
+                del b_buy_raw[i]
+                #print("Buy row deleted")
+
+        b_sell = np.array(b_sell_raw)
+        b_buy = np.array(b_buy_raw)
+
+        res1 = linprog(
+            c=c,
+            A_ub=A_sell,
+            b_ub=b_sell,
+            method='highs',
+            bounds=[(0.0,1.0)]*nr_of_mgs,
+            #options={"disp":True}
+        )
+
+        res2 = linprog(
+            c=c,
+            A_ub=A_buy,
+            b_ub=b_buy,
+            method='highs',
+            bounds=[(0.0,1.0)]*nr_of_mgs,
+            #options={"disp":True}
+        )
+
+        #print(res1.success, res2.success)
+
+        if res1.success and res2.success:
+            #final_scale = np.minimum.reduce([res1.x, res2.x])
+
+            #print(final_scale)
+
+            new_trades =[]
+
+            #print(res1.x)
+            #print(res2.x)
+
+            for trade in trades:
+                #This might be wrong
+                scale_factor = min(res2.x[trade.buyer.id], res1.x[trade.seller.id])
+                #print(scale_factor)
+                new_trades.append(Trade(seller=trade.seller, buyer=trade.buyer, amount=trade.amount*scale_factor))
+
+            #raise Exception("HAHA")
+            return new_trades
+        else:
+            print ("Failed scaling")
+            raise Exception("Uh oh")
