@@ -233,6 +233,9 @@ class MicrogridNetwork:
 
         outcome = self.scale_trades(trades=outcome_raw, desires=self.desires[self.__time])
 
+        #for trade in outcome:
+            #print(f"s:{trade.seller.id} b:{trade.buyer.id} a:{trade.amount}")
+
         for i, microgrid in enumerate(self.microgrids):
             sell = 0
             buy = 0
@@ -352,7 +355,7 @@ class MicrogridNetwork:
         #axes[0].stairs(trade_counts[(Role.DOVE, Strategy.SELLER)])
         plt.stairs(trade_counts[(Role.DOVE, Strategy.SELLER)])
 
-    def scale_trades(self, trades:list[Trade], desires:list[(float, float)])->list[Trade]:
+    def scale_trades2(self, trades:list[Trade], desires:list[(float, float)])->list[Trade]:
         nr_of_mgs = len(desires)
 
         #print(desires)
@@ -434,3 +437,46 @@ class MicrogridNetwork:
         else:
             print ("Failed scaling")
             raise Exception("Uh oh")
+
+    def scale_trades(self, trades:list[Trade], desires:list[(float, float)])->list[Trade]:
+        nr_of_mgs = len(desires)
+
+        total_sales = np.zeros(nr_of_mgs)
+        total_buys = np.zeros(nr_of_mgs)
+
+
+        for trade in trades:
+            total_sales[trade.seller.id] += trade.amount
+
+        sell_scale = np.ones(nr_of_mgs)
+        for i, total_sale in enumerate(total_sales):
+            if total_sale <= desires[i][0]:
+                continue
+            sell_scale[i]=desires[i][0]/total_sale
+
+        for i, trade in enumerate(trades):
+            total_buys[trade.buyer.id] += trade.amount * sell_scale[trade.seller.id]
+
+        buy_scale = np.ones(nr_of_mgs)
+        for i, total_buy in enumerate(total_buys):
+            if total_buy <= desires[i][1]:
+                continue
+            buy_scale[i]=desires[i][1]/total_buy
+
+        return [
+            Trade(
+                seller=trade.seller,
+                buyer=trade.buyer,
+                amount=trade.amount * sell_scale[trade.seller.id] * buy_scale[trade.buyer.id]
+                )
+                for trade in trades]
+
+        scaled_trades = []
+        for trade in trades:
+            amount = 1.0 * round(trade.amount * sell_scale[trade.seller.id] * buy_scale[trade.buyer.id])
+            if amount > 0:
+                #print(amount)
+                scaled_trades.append(Trade(seller=trade.seller.id, buyer=trade.buyer.id, amount=amount))
+
+        #raise Exception("UHOH")
+        return scaled_trades
