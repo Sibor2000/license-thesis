@@ -210,7 +210,12 @@ class Microgrid:
         )
 
     def calculate_next_role(self):
-        self.role.append(self.role.append(self.role[0]))
+        #self.role.append(self.role.append(self.role[0]))
+
+        if self.role[-1]==Role.DOVE:
+            self.role.append(Role.HAWK)
+        else:
+            self.role.append(Role.DOVE)
 
     def cost_strategy(self, t: int):
         # TODO: change
