@@ -107,3 +107,26 @@ class MicrogridNetworkCharts:
         axs.set_title("Roles and strategies over time")
         axs.set_xlabel("Time")
         axs.set_ylabel("Amount of MGs")
+
+    def charts_global_best_fitness(mgn:MicrogridNetwork, axs, t:int):
+
+        if t >= mgn.get_current_moment() or t<0:
+            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+
+        best_fits = mgn.models_global_histories[t]
+
+        for key, value in best_fits.items():
+            axs.plot(value, label=key)
+
+        axs.legend(loc='best')
+
+    def charts_diveristy(mgn:MicrogridNetwork, axs, t:int):
+        if t >= mgn.get_current_moment() or t<0:
+            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+
+        diversities = mgn.models_diversities[t]
+
+        for key, value in diversities.items():
+            axs.plot(value, label=key)
+
+        axs.legend(loc='best')

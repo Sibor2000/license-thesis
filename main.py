@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 random.seed(42)
 mgs = []
 
-for i in range(0, 100):
+for i in range(0, 40):
     mgs.append(
         Microgrid(
             id=i,
             max_stored_energy=100,
             initial_stored_energy=random.uniform(0, 100),
-            sell_threshold=66,
-            buy_threshold=33,
+            sell_threshold=55,
+            buy_threshold=45,
             role=[Role.DOVE],
             produced_energy=[0]*100,
             consumed_energy=[0]*100
@@ -23,14 +23,14 @@ for i in range(0, 100):
 
 print("Doves ready")
 
-for i in range(100, 150):
+for i in range(40, 50):
     mgs.append(
         Microgrid(
             id=i,
             max_stored_energy=100,
             initial_stored_energy=random.uniform(0, 100),
-            sell_threshold=66,
-            buy_threshold=33,
+            sell_threshold=55,
+            buy_threshold=45,
             role=[Role.HAWK],
             produced_energy=[0]*100,
             consumed_energy=[0]*100
@@ -52,6 +52,12 @@ MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes[0][0], axs_after
 
 MicrogridNetworkCharts.charts_role_and_strategy(mgn, t=0, axs=axes[1][1])
 MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axs=axes[1][0])
+
+fig2, axes2 = plt.subplots(1, 2, figsize=(12, 5))
+
+MicrogridNetworkCharts.charts_global_best_fitness(mgn=mgn, axs=axes2[0], t=0)
+MicrogridNetworkCharts.charts_diveristy(mgn=mgn, axs=axes2[1], t=0)
+
 
 plt.tight_layout()
 plt.show()

@@ -188,8 +188,8 @@ class Microgrid:
         )
 
         if self.role[t] == Role.DOVE:
-            sell_desire = min(sell_desire, self.E_MAX_LINES)
-            buy_desire = min(buy_desire, self.E_MAX_LINES)
+            sell_desire = min(sell_desire, 1.0 * self.E_MAX_LINES)
+            buy_desire = min(buy_desire, 1.0 * self.E_MAX_LINES)
 
         return (sell_desire, buy_desire)
 

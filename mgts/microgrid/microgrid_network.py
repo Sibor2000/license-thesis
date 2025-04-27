@@ -2,6 +2,7 @@ from mgts.microgrid import Microgrid
 from mgts.microgrid import Trade
 from mealpy.evolutionary_based import GA
 from mealpy.utils.problem import Problem
+from mealpy.utils.agent import Agent
 from mealpy import FloatVar
 import numpy as np
 from mgts.simulation.ga_constants import (
@@ -30,6 +31,11 @@ class MicrogridNetwork:
 
         self.E_MAX_LINES = E_MAX_LINES
 
+        self.models_global_histories: list[dict] = []
+        self.models_diversities: list[dict] = []
+
+        self.__circumstance_and_decision = False
+
     def update_current_moment(self):
         self.__time = len(self.microgrids[0].stored_energy)
 
@@ -52,12 +58,19 @@ class MicrogridNetwork:
             for microgrid in self.microgrids
         ]
 
-        circumstance_array = []
+        # print(len(desires))
+        # raise Exception("OF")
+
+        circumstance_array: list[Trade] = []
 
         for i, i_desires in enumerate(desires):
-            for j, j_desires in enumerate(desires[i + 1 :]):
+            for j_raw, j_desires in enumerate(desires[i + 1 :]):
+                j = i + j_raw + 1
+
                 i_to_j = min(i_desires[0], j_desires[1])
                 j_to_i = min(j_desires[0], i_desires[1])
+
+                # print(f"i:{i} j:{j} itoj{i_to_j} jtoi:{j_to_i}")
 
                 if i_to_j > 0 and j_to_i == 0:
                     circumstance_array.append(
@@ -71,29 +84,10 @@ class MicrogridNetwork:
         self.circumstance_arrays.append(circumstance_array)
         self.desires.append(desires)
 
-    def total_strategy_cost(self) -> float:
-        total_strategy_cost = 0
-        # total_overhead_cost = 0
-
-        for microgrid in self.microgrids:
-            total_strategy_cost += microgrid.cost_strategy(self.__time)
-
-        return total_strategy_cost / len(self.microgrids)
-
     def total_overhead_cost(self, outcome: list[Trade]) -> float:
+        exceed_count = sum(1 for trade in outcome if trade.amount > self.E_MAX_LINES)
 
-        total_cost = 0
-
-        for i, microgrid in enumerate(self.microgrids):
-            total_traded = 0
-            for trade in outcome:
-                if trade.seller is microgrid or trade.buyer is microgrid:
-                    total_traded += trade.amount
-
-            if total_traded > self.E_MAX_LINES:
-                total_cost += 1.0 * total_traded / self.E_MAX_LINES
-
-        return total_cost
+        return 1.0 * exceed_count / len(outcome)
 
     def total_battery_cost(self, outcome: list[Trade]) -> float:
         battery_cost = 0
@@ -158,118 +152,159 @@ class MicrogridNetwork:
                     f"BUY EXCEEDED BY {i} b:{bought} max:{self.desires[self.__time][i][1]}"
                 )
 
-        # print(f"stabilised {no_stabilised}")
-        # print(f"destabilised {no_destabilised}")
-        # print(f"no_initially_unstable {no_initally_unstable}")
-        #print(f"seller_penalty {seller_penalty}")
-        #print(f"buyer_penalty {buyer_penalty}")
-
         return (
             float(no_stabilised - no_destabilised) / no_initally_unstable
             - buyer_penalty
             - seller_penalty
         )
 
+    def variance_bonus(self, outcome: list[Trade]) -> float:
+        square_sum = 0
+        for trade in outcome:
+            square_sum += trade.amount**2
+
+        base_sum = sum(
+            desire[0] ** 2 + desire[1] ** 2 for desire in self.desires[self.__time]
+        )
+
+        return 2.0 * square_sum / base_sum
+
     def evaluate_trade(self, solution):
 
         decision = np.array(solution)
 
-        outcome_raw: list[Trade] = Trade.calculate_outcome(
-            circumstance=self.circumstance_arrays[self.__time],
-            decision=decision,
-        )
+        if self.__circumstance_and_decision:
+            outcome_raw = []
+
+            circumstance = self.circumstance_arrays[self.__time]
+            for i, trade in enumerate(circumstance):
+                outcome_raw.append(
+                    Trade(seller=trade.seller, buyer=trade.buyer, amount=decision[i])
+                )
+        else:
+            outcome_raw: list[Trade] = Trade.calculate_outcome(
+                circumstance=self.circumstance_arrays[self.__time],
+                decision=decision,
+            )
 
         outcome = self.scale_trades(
             trades=outcome_raw, desires=self.desires[self.__time]
         )
 
-        total_strategy_cost = self.total_strategy_cost()
         total_overhead_cost = self.total_overhead_cost(outcome=outcome)
         total_battery_cost = self.total_battery_cost(outcome=outcome)
 
-        #print(f"total_strat_cost {total_strategy_cost}")
-        #print(f"total_overhead_cost {total_overhead_cost}")
-        #print(f"total_battery_cost {total_battery_cost}")
+        if total_overhead_cost > 0:
+            raise Exception("HAHA")
 
+        # print(f"total_overhead_cost {total_overhead_cost}")
+        # print(f"total_battery_cost {total_battery_cost}")
+
+        variance_bonus = self.variance_bonus(outcome=outcome)
         stabilisation_bonus = self.stabilisation_bonus(outcome=outcome)
 
-        #print(f"stabilisation_bonus {stabilisation_bonus}")
+        # print(f"variance_bonus {variance_bonus}")
+        # print(f"stabilisation_bonus {stabilisation_bonus}")
 
-        #raise Exception("HAHA")
-
-        return -(total_strategy_cost + total_overhead_cost + total_battery_cost + (1-stabilisation_bonus))/4.0
-
-        final_cost = (
-            total_strategy_cost + total_overhead_cost + total_battery_cost
-        ) / 3.0
-
-        #NOTES
-        #1 You can't really put the fitness function between 0 and 1 since there is a minus inside
-        #2 The strategy cost is actually irrelevant
-        return stabilisation_bonus - final_cost
+        return (
+            -(
+                total_overhead_cost
+                + total_battery_cost
+                + (1.0 - stabilisation_bonus)
+                + (1.0 - variance_bonus)
+            )
+            / 4.0
+        )
 
     def find_optimal_trade(self):
-
         possible_trades = len(self.circumstance_arrays[self.__time])
+
+        full_scale = [trade.amount for trade in self.circumstance_arrays[self.__time]]
+
         print(f"{possible_trades} possible trades")
 
-        problem_dict = {
+        pop_sizes = [50]
+        # pop_sizes = [50, 200]
+        pcs = [0.95]
+        # pcs = [0.75, 0.95]
+        pms = [0.025]
+        # pms = [0.025, 0.25]
+        selection = ["roulette"]
+        # selection = ["roulette", "tournament"]
+        crossover = ["multi_points", "uniform"]
+        # crossover = ["one_point", "multi_points", "uniform", "arithmetic"]
+        search_scaling = [False, True]
+
+        combos = [
+            (pop, pc, pm, sel, cros, ss)
+            for pop in pop_sizes
+            for pc in pcs
+            for pm in pms
+            for sel in selection
+            for cros in crossover
+            for ss in search_scaling
+        ]
+
+        best_fits = {}
+        diversities = {}
+
+        print("Multimodelmaking")
+
+        model2 = []
+        best_agent: Agent = None
+
+        for pop, pc, pm, sel, cros, ss in combos:
+            self.__circumstance_and_decision=ss
+
+            problem_dict = {
             "bounds": FloatVar(
-                lb=[0] * possible_trades,
-                ub=[1] * possible_trades,
-                # lb=[0] * (possible_trades + 1),
-                # ub=[1] * (possible_trades + 1),
+                lb=[0.0] * possible_trades,
+                ub=[1.0] * possible_trades if self.__circumstance_and_decision else full_scale
             ),
             "obj_func": self.evaluate_trade,
             "minmax": "max",
-        }
+            }
 
-        pop_sizes = [50, 100, 200]
-        pcs = [0.75, 0.85, 0.95]
-        pms = [0.05, 0.10, 0.25]
-
-        combos = [(pop, pc, pm) for pop in pop_sizes for pc in pcs for pm in pms]
-
-        combos=[]
-
-        for (pop, pc, pm) in combos:
             model2 = GA.BaseGA(
-                epoch=GA_EPOCH, pop_size=pop, pc=pc, pm=pm
+                epoch=GA_EPOCH,
+                pop_size=pop,
+                pc=pc,
+                pm=pm,
+                selection=sel,
+                crossover=cros,
             )
             model2.solve(problem_dict)
 
-        print("Modelmaking")
+            model_id = f"{pop}-{pc}-{pm}-{sel}-{cros}-{ss}"
 
-        model = GA.BaseGA(
-            epoch=GA_EPOCH, pop_size=GA_POP_SIZE, pc=GA_CROSSOVER, pm=GA_MUTATION
-        )
-        model.solve(problem_dict)
+            best_fits[model_id] = model2.history.list_global_best_fit
+            diversities[model_id] = model2.history.list_diversity
 
-        #print(model.history)
+            if best_agent == None:
+                best_agent = model2.g_best
+            else:
+                best_agent = best_agent.get_better_solution(model2.g_best, minmax="max")
 
-        #model.history.save_global_objectives_chart(filename=f"model_charts/{self.__time}/global_obj")
-        #model.history.save_local_objectives_chart(filename=f"model_charts/{self.__time}/local_obj")
-        #model.history.save_global_best_fitness_chart(filename=f"model_charts/{self.__time}/global_bf")
-        #model.history.save_local_best_fitness_chart(filename=f"model_charts/{self.__time}/local_bf")
-        model.history.save_diversity_chart(filename=f"model_charts/{self.__time}/diversity")
+        self.models_global_histories.append(best_fits)
+        self.models_diversities.append(diversities)
 
-        final_decision = np.array(model.g_best.solution)
+        final_decision = np.array(best_agent.solution)
         self.decision_arrays.append(final_decision)
 
     def execute_optimal_trade(self):
-
-        # dropout_rate = self.decision_arrays[self.__time][-1]
-        # decision = np.array(self.decision_arrays[self.__time][:-1])
         decision = np.array(self.decision_arrays[self.__time])
 
-        # print(decision)
-
-        # print(f"Dropout rate is: {dropout_rate}")
-
-        outcome_raw = Trade.calculate_outcome(
+        if self.__circumstance_and_decision:
+            outcome_raw = Trade.calculate_outcome(
             circumstance=self.circumstance_arrays[self.__time],
             decision=decision,
-        )
+            )
+        else:
+            outcome_raw = []
+
+            circumstance=self.circumstance_arrays[self.__time]
+            for i, trade in enumerate(circumstance):
+                outcome_raw.append(Trade(seller=trade.seller, buyer=trade.buyer, amount=decision[i]))
 
         outcome = self.scale_trades(
             trades=outcome_raw, desires=self.desires[self.__time]
@@ -331,19 +366,19 @@ class MicrogridNetwork:
                 continue
             buy_scale[i] = desires[i][1] / total_buy
 
-        factor = 10 ** FLOAT_ROUNDING_DECIMALS
+        factor = 10**FLOAT_ROUNDING_DECIMALS
 
         return [
             Trade(
                 seller=trade.seller,
                 buyer=trade.buyer,
-                amount=math.floor(trade.amount * sell_scale[trade.seller.id] * buy_scale[trade.buyer.id] *factor)/factor
-                #amount=round(
-                #    trade.amount
-                #    * sell_scale[trade.seller.id]
-                #    * buy_scale[trade.buyer.id],
-                #    FLOAT_ROUNDING_DECIMALS,
-                #),
+                amount=math.floor(
+                    trade.amount
+                    * sell_scale[trade.seller.id]
+                    * buy_scale[trade.buyer.id]
+                    * factor
+                )
+                / factor,
             )
             for trade in trades
         ]
