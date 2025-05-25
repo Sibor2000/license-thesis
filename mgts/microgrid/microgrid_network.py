@@ -5,20 +5,10 @@ from mealpy.utils.problem import Problem
 from mealpy.utils.agent import Agent
 from mealpy import FloatVar
 import numpy as np
-from mgts.simulation.ga_constants import (
-    GA_EPOCH,
-    GA_POP_SIZE,
-    GA_CROSSOVER,
-    GA_MUTATION,
-)
 from mgts.simulation.constants import E_MAX_LINES, FLOAT_ROUNDING_DECIMALS
-import matplotlib.pyplot as plt
-import random
-from mgts.behavior import Role, Strategy
-import mgts.style as styl
-from scipy.optimize import linprog
 import math
-from matplotlib.ticker import MultipleLocator
+import csv
+
 
 class MicrogridNetwork:
     def __init__(self, microgrids: list[Microgrid] = None):
@@ -33,6 +23,9 @@ class MicrogridNetwork:
 
         self.models_global_histories: list[dict] = []
         self.models_diversities: list[dict] = []
+        self.models_exploration: list[dict] = []
+        self.models_exploitation: list[dict] = []
+        self.models_runtimes: list[dict] = []
 
         self.__circumstance_and_decision = False
 
@@ -57,9 +50,6 @@ class MicrogridNetwork:
             microgrid.calculate_tradeable_energy(self.__time)
             for microgrid in self.microgrids
         ]
-
-        # print(len(desires))
-        # raise Exception("OF")
 
         circumstance_array: list[Trade] = []
 
@@ -194,9 +184,6 @@ class MicrogridNetwork:
         total_overhead_cost = self.total_overhead_cost(outcome=outcome)
         total_battery_cost = self.total_battery_cost(outcome=outcome)
 
-        if total_overhead_cost > 0:
-            raise Exception("HAHA")
-
         # print(f"total_overhead_cost {total_overhead_cost}")
         # print(f"total_battery_cost {total_battery_cost}")
 
@@ -223,70 +210,132 @@ class MicrogridNetwork:
 
         print(f"{possible_trades} possible trades")
 
-        pop_sizes = [50]
-        # pop_sizes = [50, 200]
-        pcs = [0.95]
-        # pcs = [0.75, 0.95]
-        pms = [0.025]
-        # pms = [0.025, 0.25]
-        selection = ["roulette"]
-        # selection = ["roulette", "tournament"]
-        crossover = ["multi_points", "uniform"]
-        # crossover = ["one_point", "multi_points", "uniform", "arithmetic"]
-        search_scaling = [False, True]
+        csv_write = False
+        csv_file = None
+        csv_writer = None
 
-        combos = [
-            (pop, pc, pm, sel, cros, ss)
-            for pop in pop_sizes
-            for pc in pcs
-            for pm in pms
-            for sel in selection
-            for cros in crossover
-            for ss in search_scaling
-        ]
+        custom_combos = True
+        combos = None
+
+        if csv_write:
+            csv_file = open("sol.csv", "w", newline="", encoding="utf-8")
+            csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_MINIMAL)
+
+        if custom_combos:
+            combos = [
+                #TODO: calculate the best solutions params
+                (200, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 25),
+                (200, 0.75, 0.025, "tournament", "uniform", False, "flip", False, 25),
+                (200, 0.95, 0.050, "tournament", "uniform", False, "flip", False, 25),
+                (200, 0.75, 0.050, "tournament", "uniform", False, "flip", False, 25)
+                ]
+
+            combos = [
+                (20, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 10),
+                (40, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 10),
+            ]
+        else:
+            pop_sizes = [50, 200]
+            pcs = [0.75, 0.95]
+            pms = [0.025, 0.05, 0.25]
+            selection = ["roulette", "tournament"]
+            crossover = ["one_point", "multi_points", "uniform", "arithmetic"]
+            mutation_multipoints = [True, False]
+            mutation = ["flip", "swap"]
+            search_scaling = [False, True]
+            epoch = [25]
+
+            combos = [
+                (pop, pc, pm, sel, cros, mp, mut, ss, ep)
+                for pop in pop_sizes
+                for pc in pcs
+                for pm in pms
+                for sel in selection
+                for cros in crossover
+                for mp in mutation_multipoints
+                for mut in mutation
+                for ss in search_scaling
+                for ep in epoch
+            ]
+
+        print(f"There are {len(combos)} in total")
 
         best_fits = {}
         diversities = {}
-
+        explorations = {}
+        exploitations = {}
+        runtimes = {}
         print("Multimodelmaking")
 
         model2 = []
         best_agent: Agent = None
 
-        for pop, pc, pm, sel, cros, ss in combos:
-            self.__circumstance_and_decision=ss
+        for pop, pc, pm, sel, cros, mp, mut, ss, ep in combos:
+            self.__circumstance_and_decision = ss
 
             problem_dict = {
-            "bounds": FloatVar(
-                lb=[0.0] * possible_trades,
-                ub=[1.0] * possible_trades if self.__circumstance_and_decision else full_scale
-            ),
-            "obj_func": self.evaluate_trade,
-            "minmax": "max",
+                "bounds": FloatVar(
+                    lb=[0.0] * possible_trades,
+                    ub=(
+                        [1.0] * possible_trades
+                        if self.__circumstance_and_decision
+                        else full_scale
+                    ),
+                ),
+                "obj_func": self.evaluate_trade,
+                "minmax": "max",
             }
 
             model2 = GA.BaseGA(
-                epoch=GA_EPOCH,
+                epoch=ep,
                 pop_size=pop,
                 pc=pc,
                 pm=pm,
+                mutation_multipoints=mp,
+                mut=mut,
                 selection=sel,
                 crossover=cros,
             )
             model2.solve(problem_dict)
 
-            model_id = f"{pop}-{pc}-{pm}-{sel}-{cros}-{ss}"
+            model_id = f"{pop}-{pc}-{pm}-{mp}-{mut}-{sel}-{cros}-{ss}"
 
             best_fits[model_id] = model2.history.list_global_best_fit
             diversities[model_id] = model2.history.list_diversity
+            explorations[model_id] = model2.history.list_exploration
+            exploitations[model_id] = model2.history.list_exploitation
+            runtimes[model_id] = sum(model2.history.list_epoch_time)
 
             if best_agent == None:
                 best_agent = model2.g_best
             else:
                 best_agent = best_agent.get_better_solution(model2.g_best, minmax="max")
 
+            if csv_write:
+                csv_writer.writerow(
+                    [
+                        pop,
+                        pc,
+                        pm,
+                        sel,
+                        cros,
+                        ss,
+                        model2.g_best.target.fitness,
+                        model2.history.list_diversity[-1],
+                        model2.history.list_exploration[-1],
+                        model2.history.list_exploitation[-1],
+                        sum(model2.history.list_epoch_time)
+                    ]
+                )
+
+        if csv_write:
+            csv_file.close()
+
         self.models_global_histories.append(best_fits)
         self.models_diversities.append(diversities)
+        self.models_exploration.append(explorations)
+        self.models_exploitation.append(exploitations)
+        self.models_runtimes.append(runtimes)
 
         final_decision = np.array(best_agent.solution)
         self.decision_arrays.append(final_decision)
@@ -296,15 +345,17 @@ class MicrogridNetwork:
 
         if self.__circumstance_and_decision:
             outcome_raw = Trade.calculate_outcome(
-            circumstance=self.circumstance_arrays[self.__time],
-            decision=decision,
+                circumstance=self.circumstance_arrays[self.__time],
+                decision=decision,
             )
         else:
             outcome_raw = []
 
-            circumstance=self.circumstance_arrays[self.__time]
+            circumstance = self.circumstance_arrays[self.__time]
             for i, trade in enumerate(circumstance):
-                outcome_raw.append(Trade(seller=trade.seller, buyer=trade.buyer, amount=decision[i]))
+                outcome_raw.append(
+                    Trade(seller=trade.seller, buyer=trade.buyer, amount=decision[i])
+                )
 
         outcome = self.scale_trades(
             trades=outcome_raw, desires=self.desires[self.__time]
@@ -344,6 +395,8 @@ class MicrogridNetwork:
         self, trades: list[Trade], desires: list[(float, float)]
     ) -> list[Trade]:
         nr_of_mgs = len(desires)
+
+        # print(desires)
 
         total_sales = np.zeros(nr_of_mgs)
         total_buys = np.zeros(nr_of_mgs)

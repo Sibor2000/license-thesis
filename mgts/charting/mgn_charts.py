@@ -24,12 +24,17 @@ class MicrogridNetworkCharts:
         #    label.set_rotation(45)
         axs_before.set_ylim(0, 1)
         axs_before.set_title("Initial energies")
+        axs_before.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
+        axs_before.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
 
-        axs_after.bar(mg_ids, latest_energies, color="green")
+        axs_after.bar(mg_ids, latest_energies, color="blue")
         axs_after.set_xlabel("Microgrid ids")
         axs_after.set_ylabel("Stored energy ratio")
         axs_after.set_ylim(0, 1)
         axs_after.set_title("Post trade energies")
+        axs_after.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
+        axs_after.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
+
 
     def charts_role_and_strategy(mgn:MicrogridNetwork, t, axs):
         trade_counts = {
@@ -54,7 +59,7 @@ class MicrogridNetworkCharts:
         axs.pie(amounts, labels=labels, colors=styl.STRATEGIES_COLOR_ARRAY)
         axs.set_title(f"Roles and strategies at moment {t}")
 
-    def charts_stabilities_before_and_after_trade(mgn:MicrogridNetwork, t):
+    def charts_stabilities_before_and_after_trade(mgn:MicrogridNetwork, axs, t):
         stabilities = {
             "stable_before": 0,
             "unstable_before": 0,
@@ -64,7 +69,7 @@ class MicrogridNetworkCharts:
 
         for microgrid in mgn.microgrids:
 
-            if microgrid.is_stable(t):
+            if microgrid.is_stable(t, post_trade=False):
                 stabilities["stable_before"] += 1
             else:
                 stabilities["unstable_before"] += 1
@@ -73,6 +78,29 @@ class MicrogridNetworkCharts:
                 stabilities["stable_after"] += 1
             else:
                 stabilities["unstable_after"] += 1
+
+        #states = list(stabilities.keys())
+        #counts = list(stabilities.values())
+
+        labels = ["Stable", "Unstable"]
+        befores = [stabilities["stable_before"], stabilities["unstable_before"]]
+        afters = [stabilities["stable_after"], stabilities["unstable_after"]]
+
+        x= np.arange(len(labels))
+        width = 0.35
+
+        axs.bar(x-width/2, befores, width, label="Before trade", color="orange")
+        axs.bar(x+width/2, afters, width, label="After trade", color="blue")
+
+        axs.set_title(f"Stable and unstable microgrids before and after trade in moment {t}")
+
+        axs.set_xticks(x)
+        axs.set_xticklabels(labels)
+
+        axs.set_ylabel("Nr. Of MGs")
+
+        axs.legend()
+
 
     def charts_roles_and_strategies_over_time(mgn:MicrogridNetwork, axs):
         trade_counts = {
@@ -119,6 +147,9 @@ class MicrogridNetworkCharts:
             axs.plot(value, label=key)
 
         axs.legend(loc='best')
+        axs.set_xlabel("Epoch")
+        axs.set_ylabel("Fitness")
+        axs.set_title(f"Global best fitness at moment {t}")
 
     def charts_diveristy(mgn:MicrogridNetwork, axs, t:int):
         if t >= mgn.get_current_moment() or t<0:
@@ -130,3 +161,41 @@ class MicrogridNetworkCharts:
             axs.plot(value, label=key)
 
         axs.legend(loc='best')
+        axs.set_xlabel("Epoch")
+        axs.set_ylabel("Diversity")
+        axs.set_title(f"Diversity at moment {t}")
+
+    def chart_exploration_vs_exploitation(mgn: MicrogridNetwork, axs, t:int):
+        if t >= mgn.get_current_moment() or t<0:
+            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+
+        explorations = mgn.models_exploration[t]
+        exploitations = mgn.models_exploitation[t]
+
+        for key, value in explorations.items():
+            axs.plot(value, label=f"Exploration {key}")
+
+            exploitations_value = exploitations[key]
+
+            axs.plot(exploitations_value, label=f"Exploitation {key}")
+
+        axs.set_title(f"Exploration vs Exploitation for various hyperparameters")
+        axs.set_xlabel("Epoch")
+        axs.legend(loc='best')
+
+    def chart_final_fitness(mgn: MicrogridNetwork, axs, t:int):
+        if t >= mgn.get_current_moment() or t<0:
+            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+
+    def chart_runtime(mgn: MicrogridNetwork, axs, t:int):
+        if t >= mgn.get_current_moment() or t<0:
+            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+
+        mod_run = mgn.models_runtimes[t]
+        models = list(mod_run.keys())
+        runtimes = list(mod_run.values())
+
+        axs.bar(models, runtimes, color='skyblue')
+
+        axs.set_title(f'Runtimes at moment {t}')
+        axs.set_ylabel("Time (s)")
