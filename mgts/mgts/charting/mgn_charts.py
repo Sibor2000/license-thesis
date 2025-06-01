@@ -3,6 +3,9 @@ import mgts.style as styl
 from matplotlib.ticker import MultipleLocator
 import numpy as np
 from mgts.microgrid.microgrid_network import MicrogridNetwork
+import io
+import base64
+import matplotlib.pyplot as plt
 
 class MicrogridNetworkCharts:
     def charts_energy_delta(mgn:MicrogridNetwork, axs_before, axs_after):
@@ -34,7 +37,6 @@ class MicrogridNetworkCharts:
         axs_after.set_title("Post trade energies")
         axs_after.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
         axs_after.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
-
 
     def charts_role_and_strategy(mgn:MicrogridNetwork, t, axs):
         trade_counts = {
@@ -199,3 +201,16 @@ class MicrogridNetworkCharts:
 
         axs.set_title(f'Runtimes at moment {t}')
         axs.set_ylabel("Time (s)")
+
+    def generate_img_from_axs(axs: plt.Axes):
+        fig = axs.get_figure()
+
+        buf = io.BytesIO()
+
+        fig.savefig(buf, format="png")
+        buf.seek(0)
+
+        img_bytes = buf.getvalue()
+        img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+
+        return img_b64

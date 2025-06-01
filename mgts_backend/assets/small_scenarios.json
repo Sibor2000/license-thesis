@@ -3,7 +3,7 @@
         "id": "120mg",
         "sellThreshold": 55,
         "buyThreshold": 45,
-        "duration": 5,
+        "simulationDuration": 5,
         "nrOfMicrogrids": 4,
         "eMax": 5,
         "microgrids": [
@@ -101,7 +101,7 @@
         "id": "1mg",
         "sellThreshold": 85,
         "buyThreshold": 25,
-        "duration": 5,
+        "simulationDuration": 5,
         "nrOfMicrogrids": 4,
         "eMax": 5,
         "microgrids": [

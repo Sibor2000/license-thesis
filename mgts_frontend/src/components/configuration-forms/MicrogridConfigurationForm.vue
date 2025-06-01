@@ -26,7 +26,7 @@
             <label>
                 Initial Role
             </label>
-            <select>
+            <select v-model="localMicroGridData.initialRole">
                 <option>Hawk</option>
                 <option>Dove</option>
             </select>

@@ -2,6 +2,8 @@ from mgts.reader import Reader
 from mgts.microgrid import Microgrid
 import pandas as pd
 from typing_extensions import List
+from mgts.behavior import get_role_from_str
+
 
 class MicrogridFactory:
     def __init__(self, path=None):
@@ -78,5 +80,33 @@ class MicrogridFactory:
             microgrid.max_stored_energy = row[max_stored_energy_column]
             microgrid.battery_lifetime_cycles = row[battery_lifetime_cycles_column]
             microgrids.append(microgrid)
+
+        return microgrids
+
+    def create_from_dict(simulation_dict) -> list[Microgrid]:
+        microgrids_raw = simulation_dict["microgrids"]
+        nr_of_mgs = simulation_dict["nrOfMicrogrids"]
+
+        microgrids_raw = microgrids_raw[:nr_of_mgs]
+
+
+        microgrids = []
+
+        for microgrid_raw in microgrids_raw:
+            microgrids.append(
+                Microgrid(
+                    microgrid_raw["id"],
+                    max_stored_energy=microgrid_raw["maxStored"],
+                    charge_efficiency=microgrid_raw["chargeEfficiency"],
+                    discharge_efficiency=microgrid_raw["dischargeEfficiency"],
+                    initial_stored_energy=microgrid_raw["initialStored"],
+                    role=[get_role_from_str(microgrid_raw["initialRole"])],
+                    produced_energy=microgrid_raw["production"],
+                    consumed_energy=microgrid_raw["consumption"],
+                    sell_threshold=simulation_dict["sellThreshold"],
+                    buy_threshold=simulation_dict["buyThreshold"],
+                    e_max_lines=simulation_dict["eMax"]
+                )
+            )
 
         return microgrids

@@ -1,5 +1,6 @@
 from mgts.microgrid import MicrogridFactory
-
+from mgts.behavior import Role
+import json
 
 def test_create_from_sheet():
     path = "./datasets/test.xlsx"
@@ -37,3 +38,17 @@ def test_create_from_file():
     assert microgrids[1].produced_energy == [0, 10, 15, 20, 25, 25, 20, 20, 20]
     assert microgrids[1].initial_stored_energy == 0
     assert microgrids[1].battery_lifetime_cycles == 20
+
+def test_create_from_dict():
+    path = "./datasets/test/one_scenario.json"
+
+    with open(path, 'r') as f:
+        data = json.load(f)
+
+    microgrids = MicrogridFactory.create_from_dict(data)
+
+    assert len(microgrids) == data["nrOfMicrogrids"]
+    assert microgrids[2].produced_energy == [1,2,3,4,5]
+    assert microgrids[2].consumed_energy == [9,8,7,6,5]
+    assert microgrids[0].role[0] == Role.DOVE
+    assert microgrids[3].role[0] == Role.HAWK

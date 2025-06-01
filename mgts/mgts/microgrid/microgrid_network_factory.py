@@ -29,3 +29,10 @@ class MicrogridNetworkFactory:
         )
 
         return MicrogridNetwork(microgrids=microgrids)
+
+    def create_from_dict(
+        simulationDict
+    )->MicrogridNetwork:
+        microgrids = MicrogridFactory.create_from_dict(simulationDict)
+        return MicrogridNetwork(microgrids=microgrids, e_max_lines=simulationDict["eMax"])
+

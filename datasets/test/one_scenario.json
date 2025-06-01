@@ -1,0 +1,120 @@
+{
+    "id": "120mg",
+    "sellThreshold": 55,
+    "buyThreshold": 45,
+    "simulationDuration": 5,
+    "nrOfMicrogrids": 4,
+    "eMax": 5,
+    "microgrids": [
+        {
+            "id": 0,
+            "chargeEfficiency": 1,
+            "dischargeEfficiency": 1,
+            "initialStored": 0,
+            "maxStored": 100,
+            "initialRole": "Dove",
+            "production": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "consumption": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "chargeEfficiency": 1,
+            "dischargeEfficiency": 1,
+            "initialStored": 0,
+            "maxStored": 100,
+            "initialRole": "Dove",
+            "production": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "consumption": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "id": 2,
+            "chargeEfficiency": 1,
+            "dischargeEfficiency": 1,
+            "initialStored": 0,
+            "maxStored": 100,
+            "initialRole": "Dove",
+            "production": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "consumption": [
+                9,
+                8,
+                7,
+                6,
+                5
+            ]
+        },
+        {
+            "id": 3,
+            "chargeEfficiency": 1,
+            "dischargeEfficiency": 1,
+            "initialStored": 0,
+            "maxStored": 100,
+            "initialRole": "Hawk",
+            "production": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "consumption": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "id": 4,
+            "chargeEfficiency": 0.7,
+            "dischargeEfficiency": 1,
+            "initialStored": 0,
+            "maxStored": 100,
+            "initialRole": "Hawk",
+            "production": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "consumption": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        }
+    ]
+}

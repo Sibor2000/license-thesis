@@ -3,7 +3,7 @@
         <h1>Welcome, to MGTS!</h1>
 
         <div>
-            <RouterLink to="/datasource">
+            <RouterLink :to="`/datasource/${randomId}`">
                 <button>
                     Let's Begin
                 </button>
@@ -11,6 +11,22 @@
         </div>
     </div>
 </template>
+
+<script>
+export default {
+    data(){
+        return {
+            randomId: this.generateId()
+        }
+    },
+    methods:{
+        generateId(){
+            return Math.random().toString(36).substring(2, 10)
+        }
+    }
+}
+
+</script>
 
 <style scoped>
 .flex-container {

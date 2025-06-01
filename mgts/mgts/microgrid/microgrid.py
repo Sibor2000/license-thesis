@@ -25,6 +25,7 @@ class Microgrid:
         buy_threshold=DEFAULT_BUY_THRESHOLD,
         role: list[Role] = [Role.DOVE],
         battery_operations: list = None,
+        e_max_lines: float = E_MAX_LINES
     ):
         self.id = id
 
@@ -52,7 +53,7 @@ class Microgrid:
         self.role = role
 
         #! Misc internal fields
-        self.E_MAX_LINES = E_MAX_LINES
+        self.e_max_lines = e_max_lines
 
     def state(self, t):
         return self.produced_energy[t] + self.stored_energy[t] - self.consumed_energy[t]
@@ -188,8 +189,8 @@ class Microgrid:
         )
 
         if self.role[t] == Role.DOVE:
-            sell_desire = min(sell_desire, 1.0 * self.E_MAX_LINES)
-            buy_desire = min(buy_desire, 1.0 * self.E_MAX_LINES)
+            sell_desire = min(sell_desire, 1.0 * self.e_max_lines)
+            buy_desire = min(buy_desire, 1.0 * self.e_max_lines)
 
         return (sell_desire, buy_desire)
 

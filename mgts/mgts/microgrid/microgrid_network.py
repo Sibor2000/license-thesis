@@ -11,7 +11,7 @@ import csv
 
 
 class MicrogridNetwork:
-    def __init__(self, microgrids: list[Microgrid] = None):
+    def __init__(self, microgrids: list[Microgrid] = None, e_max_lines = E_MAX_LINES):
         self.microgrids = microgrids if microgrids else []
         self.__time = 0
 
@@ -19,7 +19,7 @@ class MicrogridNetwork:
         self.desires = []
         self.decision_arrays = []
 
-        self.E_MAX_LINES = E_MAX_LINES
+        self.e_max_lines = e_max_lines
 
         self.models_global_histories: list[dict] = []
         self.models_diversities: list[dict] = []
@@ -75,7 +75,7 @@ class MicrogridNetwork:
         self.desires.append(desires)
 
     def total_overhead_cost(self, outcome: list[Trade]) -> float:
-        exceed_count = sum(1 for trade in outcome if trade.amount > self.E_MAX_LINES)
+        exceed_count = sum(1 for trade in outcome if trade.amount > self.e_max_lines)
 
         return 1.0 * exceed_count / len(outcome)
 

@@ -53,6 +53,7 @@
             </div>
         </div>
 
+        <!--
         <div>
             <RouterLink to="/adjust">
                 <button>
@@ -60,10 +61,16 @@
                 </button>
             </RouterLink>
         </div>
-
+-->
         <div>
             <button @click="compileSimulationData">
                 Compile
+            </button>
+        </div>
+
+        <div>
+            <button @click="submitAndRedirect">
+                Set & Next
             </button>
         </div>
     </div>
@@ -107,10 +114,9 @@ export default {
             this.activeOption = this.selectedExampleConfig
 
             const response = await axios.get(`http://localhost:8000/example_scenario/${this.selectedExampleConfig}`)
-            console.log(response.data)
 
             const simulation = response.data
-            this.simulationDuration = simulation.duration
+            this.simulationDuration = simulation.simulationDuration
             this.microGridArray = simulation.microgrids
             this.nrOfMicrogrids = simulation.nrOfMicrogrids
             this.buyThreshold = Number(simulation.buyThreshold)
@@ -124,8 +130,51 @@ export default {
             const response = await axios.get('http://localhost:8000/example_scenario_ids')
             this.exampleConfigs = response.data
         },
-        compileSimulationData(){
-            console.log(this.microGridArray)
+        async compileSimulationData(){
+            const simulationData = {
+                id: this.$route.params.id,
+                sellThreshold: this.sellThreshold,
+                buyThreshold: this.buyThreshold,
+                simulationDuration: this.simulationDuration,
+                nrOfMicrogrids: this.nrOfMicrogrids,
+                eMax: this.eMax,
+                microgrids: this.microGridArray
+            }
+            console.log(simulationData)
+
+            /*
+            try {
+                const response = await axios.post('http://localhost:8000/create_simulation', simulationData)
+                console.log(response.data)
+            } catch (error) {
+                console.log(error)
+            }
+                */
+        },
+        async submitAndRedirect(){
+
+            const simulationId = this.$route.params.id
+
+            const simulationData = {
+                id: simulationId,
+                sellThreshold: this.sellThreshold,
+                buyThreshold: this.buyThreshold,
+                simulationDuration: this.simulationDuration,
+                nrOfMicrogrids: this.nrOfMicrogrids,
+                eMax: this.eMax,
+                microgrids: this.microGridArray
+            }
+
+            try {
+                const response = await axios.post('http://localhost:8000/create_simulation', simulationData)
+
+                if(response.status === 200){
+                    this.$router.push(`/simulation/${simulationId}`)
+                }
+
+            } catch (error) {
+                console.log(error)
+            }
         }
     },
     components: {
@@ -136,11 +185,14 @@ export default {
         nrOfMicrogrids(newVal, oldVal) {
             while (newVal > this.microGridArray.length) {
                 this.microGridArray.push({
-                    id: this.microGridArray.length
+                    id: this.microGridArray.length,
+                    production:[],
+                    consumption: []
                 })
             }
         }
-    }
+    },
+    props: ['id']
 }
 </script>
 
