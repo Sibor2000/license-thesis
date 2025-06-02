@@ -50,7 +50,7 @@ fig, axes = plt.subplots(2, 2, figsize=(12, 5))
 
 MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes[0][0], axs_after=axes[0][1])
 
-MicrogridNetworkCharts.charts_role_and_strategy(mgn, t=0, axs=axes[1][1])
+MicrogridNetworkCharts.chart_role_and_strategy(mgn, t=0, axs=axes[1][1])
 MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axs=axes[1][0])
 
 plt.tight_layout()

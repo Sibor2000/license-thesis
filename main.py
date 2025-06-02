@@ -1,4 +1,4 @@
-from mgts.microgrid import MicrogridFactory, MicrogridNetworkFactory, Microgrid, MicrogridNetwork
+from mgts.microgrid import Microgrid, MicrogridNetwork
 from mgts.behavior.behavior import Role
 from mgts.charting.mgn_charts import MicrogridNetworkCharts
 import random
@@ -18,7 +18,8 @@ for i in range(0, dove_count):
         Microgrid(
             id=i,
             max_stored_energy=100,
-            initial_stored_energy=random.uniform(0, 100),
+            #initial_stored_energy=random.uniform(0, 100),
+            initial_stored_energy=100,
             sell_threshold=sell_threshold,
             buy_threshold=buy_threshold,
             role=[Role.DOVE],
@@ -34,7 +35,8 @@ for i in range(dove_count, dove_count + hawk_count):
         Microgrid(
             id=i,
             max_stored_energy=100,
-            initial_stored_energy=random.uniform(0, 100),
+            #initial_stored_energy=random.uniform(0, 100),
+            initial_stored_energy=100,
             sell_threshold=sell_threshold,
             buy_threshold=buy_threshold,
             role=[Role.HAWK],
@@ -48,9 +50,9 @@ print("Hawks ready")
 mgn = MicrogridNetwork(microgrids=mgs)
 
 mgn.step_time()
-mgn.step_time()
-mgn.step_time()
-mgn.step_time()
+#mgn.step_time()
+#mgn.step_time()
+#mgn.step_time()
 
 
 charts = True
@@ -60,13 +62,13 @@ if charts:
 
     MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes[0][0], axs_after=axes[0][1])
 
-    MicrogridNetworkCharts.charts_role_and_strategy(mgn, t=0, axs=axes[1][1])
+    MicrogridNetworkCharts.chart_role_and_strategy(mgn, axs=axes[1][1], t=0)
     MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axs=axes[1][0])
 
     fig2, axes2 = plt.subplots(1, 2, figsize=(12, 5))
 
-    MicrogridNetworkCharts.charts_global_best_fitness(mgn=mgn, axs=axes2[0], t=0)
-    MicrogridNetworkCharts.charts_diveristy(mgn=mgn, axs=axes2[1], t=0)
+    MicrogridNetworkCharts.chart_global_best_fitness(mgn=mgn, axs=axes2[0], t=0)
+    MicrogridNetworkCharts.chart_diveristy(mgn=mgn, axs=axes2[1], t=0)
 
     fig3, axes3 = plt.subplots(1, 2, figsize=(12, 5))
 
@@ -75,7 +77,7 @@ if charts:
 
     fig4, axes4 = plt.subplots(1, 1, figsize=(12, 5))
 
-    MicrogridNetworkCharts.charts_stabilities_before_and_after_trade(mgn=mgn, axs=axes4, t=0)
+    MicrogridNetworkCharts.chart_stabilities_before_and_after_trade(mgn=mgn, axs=axes4)
 
     plt.tight_layout()
     plt.show()

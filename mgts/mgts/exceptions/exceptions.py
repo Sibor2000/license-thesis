@@ -1,0 +1,2 @@
+class EndOfSimulationException(Exception):
+    pass

@@ -10,6 +10,7 @@ from mgts.behavior.behavior import Role
 import random
 from mgts.charting.mgn_charts import MicrogridNetworkCharts
 from mgts.microgrid import MicrogridNetworkFactory
+from mgts.exceptions import EndOfSimulationException
 import matplotlib.pyplot as plt
 
 
@@ -102,16 +103,54 @@ def create_simulation(sim: SimulationRequest):
 
 
 async def step_time_and_send_charts(ws: WebSocket, mgn: MicrogridNetwork):
-    mgn.step_time()
+    try:
+        mgn.step_time()
+    except EndOfSimulationException:
+        await ws.send_json({
+            "type":"text",
+            "payload":"End of simulation has been reached"
+            })
+        return
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 5))
+    #Sim charts
+    fig_energy_delta, axes_energy_delta = plt.subplots(1, 2)
+    fig_role_strat_progress, axes_role_strat_progress = plt.subplots()
+    MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes_energy_delta[0], axs_after=axes_energy_delta[1])
+    MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axes_role_strat_progress)
+    chart_en_delta_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_energy_delta)
+    chart_ro_st_ot_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_role_strat_progress)
 
-    MicrogridNetworkCharts.charts_energy_delta(
-        mgn, axs_before=axes[0][0], axs_after=axes[0][1]
-    )
-    img_b64 = MicrogridNetworkCharts.generate_img_from_axs(axes[0][0])
+    #Moment charts
+    fig_role_strat, axes_role_strat = plt.subplots()
+    fig_glob_best_fit, axes_glob_best_fit = plt.subplots()
+    fig_diversity, axes_diversity = plt.subplots()
+    fig_exp_vs_exp, axes_exp_vs_exp = plt.subplots()
+    fig_runtime, axes_runtime = plt.subplots()
+    MicrogridNetworkCharts.chart_role_and_strategy(mgn, axes_role_strat)
+    MicrogridNetworkCharts.chart_global_best_fitness(mgn, axes_glob_best_fit)
+    MicrogridNetworkCharts.chart_diveristy(mgn, axes_diversity)
+    MicrogridNetworkCharts.chart_exploration_vs_exploitation(mgn, axes_exp_vs_exp)
+    MicrogridNetworkCharts.chart_runtime(mgn, axes_runtime)
+    chart_ro_st_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_role_strat)
+    chart_glob_bf_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_glob_best_fit)
+    chart_div_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_diversity)
+    chart_ex_v_ex_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_exp_vs_exp)
+    chart_runtime_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_runtime)
 
-    await ws.send_json({"type": "chart", "data": img_b64})
+    await ws.send_json({
+        "type":"charts",
+        "simCharts":[
+            chart_en_delta_b64,
+            chart_ro_st_ot_b64
+        ],
+        "momentCharts":[
+            chart_ro_st_b64,
+            chart_glob_bf_b64,
+            chart_div_b64,
+            chart_ex_v_ex_b64,
+            chart_runtime_b64
+        ]
+    })
 
 @app.get("/test_ws/{sim_id}")
 async def test_ws(sim_id: str):

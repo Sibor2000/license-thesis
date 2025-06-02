@@ -6,6 +6,7 @@ from mgts.simulation.constants import (
     E_MAX_LINES,
 )
 from mgts.behavior import Role, Strategy
+from mgts.exceptions import EndOfSimulationException
 
 
 class Microgrid:
@@ -64,6 +65,9 @@ class Microgrid:
             previous_energy = self.initial_stored_energy
         else:
             previous_energy = self.stored_energy_post_trade[t - 1]
+
+        if t>=len(self.produced_energy) or t>=len(self.consumed_energy):
+            raise EndOfSimulationException
 
         delta_energy = self.produced_energy[t] - self.consumed_energy[t]
         if delta_energy > 0:  # charge

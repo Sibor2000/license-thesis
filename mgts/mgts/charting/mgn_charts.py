@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 class MicrogridNetworkCharts:
     def charts_energy_delta(mgn:MicrogridNetwork, axs_before, axs_after):
+        MicrogridNetworkCharts.check_time(mgn)
+
         initial_energies = [
             mg.calculate_initial_battery_percentage() for mg in mgn.microgrids
         ]
@@ -38,7 +40,9 @@ class MicrogridNetworkCharts:
         axs_after.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
         axs_after.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
 
-    def charts_role_and_strategy(mgn:MicrogridNetwork, t, axs):
+    def chart_role_and_strategy(mgn:MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
+
         trade_counts = {
             (Role.DOVE, Strategy.SELLER): 0,
             (Role.DOVE, Strategy.BUYER): 0,
@@ -55,13 +59,16 @@ class MicrogridNetworkCharts:
         amounts = []
 
         for rs, amount in trade_counts.items():
-            labels.append(rs[0].name + " " + rs[1].name)
-            amounts.append(amount)
+            if amount!=0:
+                labels.append(rs[0].name + " " + rs[1].name)
+                amounts.append(amount)
 
         axs.pie(amounts, labels=labels, colors=styl.STRATEGIES_COLOR_ARRAY)
         axs.set_title(f"Roles and strategies at moment {t}")
 
-    def charts_stabilities_before_and_after_trade(mgn:MicrogridNetwork, axs, t):
+    def chart_stabilities_before_and_after_trade(mgn:MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
+
         stabilities = {
             "stable_before": 0,
             "unstable_before": 0,
@@ -103,8 +110,8 @@ class MicrogridNetworkCharts:
 
         axs.legend()
 
-
     def charts_roles_and_strategies_over_time(mgn:MicrogridNetwork, axs):
+        MicrogridNetworkCharts.check_time(mgn)
         trade_counts = {
             (Role.DOVE, Strategy.SELLER): [],
             (Role.DOVE, Strategy.BUYER): [],
@@ -138,10 +145,8 @@ class MicrogridNetworkCharts:
         axs.set_xlabel("Time")
         axs.set_ylabel("Amount of MGs")
 
-    def charts_global_best_fitness(mgn:MicrogridNetwork, axs, t:int):
-
-        if t >= mgn.get_current_moment() or t<0:
-            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+    def chart_global_best_fitness(mgn:MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
 
         best_fits = mgn.models_global_histories[t]
 
@@ -153,9 +158,8 @@ class MicrogridNetworkCharts:
         axs.set_ylabel("Fitness")
         axs.set_title(f"Global best fitness at moment {t}")
 
-    def charts_diveristy(mgn:MicrogridNetwork, axs, t:int):
-        if t >= mgn.get_current_moment() or t<0:
-            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+    def chart_diveristy(mgn:MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
 
         diversities = mgn.models_diversities[t]
 
@@ -167,9 +171,8 @@ class MicrogridNetworkCharts:
         axs.set_ylabel("Diversity")
         axs.set_title(f"Diversity at moment {t}")
 
-    def chart_exploration_vs_exploitation(mgn: MicrogridNetwork, axs, t:int):
-        if t >= mgn.get_current_moment() or t<0:
-            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+    def chart_exploration_vs_exploitation(mgn: MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
 
         explorations = mgn.models_exploration[t]
         exploitations = mgn.models_exploitation[t]
@@ -185,13 +188,11 @@ class MicrogridNetworkCharts:
         axs.set_xlabel("Epoch")
         axs.legend(loc='best')
 
-    def chart_final_fitness(mgn: MicrogridNetwork, axs, t:int):
-        if t >= mgn.get_current_moment() or t<0:
-            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+    def chart_final_fitness(mgn: MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
 
-    def chart_runtime(mgn: MicrogridNetwork, axs, t:int):
-        if t >= mgn.get_current_moment() or t<0:
-            raise Exception(f"Invalid moment {t}, valid range is 0 - {mgn.get_current_moment()}")
+    def chart_runtime(mgn: MicrogridNetwork, axs, t:int=None):
+        t = MicrogridNetworkCharts.check_time(mgn,t)
 
         mod_run = mgn.models_runtimes[t]
         models = list(mod_run.keys())
@@ -202,9 +203,7 @@ class MicrogridNetworkCharts:
         axs.set_title(f'Runtimes at moment {t}')
         axs.set_ylabel("Time (s)")
 
-    def generate_img_from_axs(axs: plt.Axes):
-        fig = axs.get_figure()
-
+    def generate_img_from_fig(fig: plt.Figure):
         buf = io.BytesIO()
 
         fig.savefig(buf, format="png")
@@ -214,3 +213,17 @@ class MicrogridNetworkCharts:
         img_b64 = base64.b64encode(img_bytes).decode('utf-8')
 
         return img_b64
+
+    def check_time(mgn:MicrogridNetwork, t:int=None)->int:
+        max_moment = mgn.get_current_moment()-1
+
+        if max_moment==-1:
+            raise Exception("Time has not progressed yet")
+
+        if t is None:
+            return max_moment
+
+        if t>max_moment or t<0:
+            raise Exception(f"Invalid time {t}, does not fall between 0 and {max_moment}")
+
+        return t

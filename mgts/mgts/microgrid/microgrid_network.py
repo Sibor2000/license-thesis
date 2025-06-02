@@ -210,6 +210,16 @@ class MicrogridNetwork:
 
         print(f"{possible_trades} possible trades")
 
+        #If no one wants to trade
+        if possible_trades==0:
+            self.models_global_histories.append({})
+            self.models_diversities.append({})
+            self.models_exploration.append({})
+            self.models_exploitation.append({})
+            self.models_runtimes.append({})
+            self.decision_arrays.append(None)
+            return
+
         csv_write = False
         csv_file = None
         csv_writer = None
@@ -341,7 +351,14 @@ class MicrogridNetwork:
         self.decision_arrays.append(final_decision)
 
     def execute_optimal_trade(self):
-        decision = np.array(self.decision_arrays[self.__time])
+        decision = self.decision_arrays[self.__time]
+
+        #If no one wants to trade
+        if decision is None:
+            for microgrid in self.microgrids:
+                microgrid.resolve_trade(self.__time, (0, 0))
+
+            return
 
         if self.__circumstance_and_decision:
             outcome_raw = Trade.calculate_outcome(

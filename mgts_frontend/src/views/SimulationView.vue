@@ -19,37 +19,37 @@
             </button>
         </div>
 
+        <div v-if="wsTextMessage">
+            {{ wsTextMessage }}
+        </div>
+
         <div class="config-zone">
             <div class="button-row">
                 <div>
-                    <button>
+                    <button @click="activeTab = -1">
                         Simulation
                     </button>
                 </div>
 
-                <div>
-                    <button>
-                        T0
-                    </button>
-                </div>
-
-                <div>
-                    <button>
-                        T1
+                <div v-for="(_, index) in momentChartsList">
+                    <button @click="activeTab = index">
+                        {{ index }}
                     </button>
                 </div>
             </div>
 
             <div>
-                <img v-if="roleChart" :src="'data:image/png;base64,' + roleChart" />
-                <img v-if="roleChart" :src="'data:image/png;base64,' + roleChart" />
-                <img v-if="roleChart" :src="'data:image/png;base64,' + roleChart" />
+                <div v-if="activeTab ===-1" class="chart-column">
+                    <img v-for="simChart in simulationCharts" :src="'data:image/png;base64,' + simChart" />
+                </div>
+
+                <div v-for="(momentCharts, index) in momentChartsList">
+                    <div v-if="activeTab===index" class="chart-column">
+                        <img v-for="momentChart in momentCharts" :src="'data:image/png;base64,' + momentChart" />
+                    </div>
+                </div>
             </div>
         </div>
-
-
-
-
 
     </div>
 
@@ -64,8 +64,10 @@ export default {
         return {
             socket: null,
             roleChart: null,
-            simulationCharts: null,
-            momentAnalysisCharts: null
+            simulationCharts: [],
+            momentChartsList: [],
+            activeTab: -1,
+            wsTextMessage:null
         }
     },
     mounted() {
@@ -79,6 +81,16 @@ export default {
             const msg = JSON.parse(event.data)
             if (msg.type === "chart") {
                 this.roleChart = msg.data
+            }
+
+            if (msg.type === "charts") {
+                this.simulationCharts = msg.simCharts
+
+                this.momentChartsList = this.momentChartsList.concat([msg.momentCharts])
+            }
+
+            if (msg.type === "text") {
+                this.wsTextMessage = msg.payload
             }
         }
 
@@ -95,8 +107,8 @@ export default {
             this.socket.close()
         }
     },
-    methods:{
-        async stepTime(){
+    methods: {
+        async stepTime() {
             try {
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/step`)
 
@@ -134,10 +146,13 @@ export default {
     height: 100%;
 }
 
-.chart-zone {
+.chart-column {
     display: flex;
     background-color: pink;
     height: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
     padding: 2px;
 }
 
