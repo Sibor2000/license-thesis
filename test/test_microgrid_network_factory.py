@@ -7,7 +7,7 @@ def test_create_from_file():
     microgrids = microgrid_network.microgrids
 
     assert len(microgrids) == 6
-    assert microgrids[0].id == "MG1"
+    assert microgrids[0].id == 0
     assert microgrids[0].charge_efficiency == 0.8
     assert microgrids[0].initial_stored_energy == 0
     assert microgrids[0].battery_lifetime_cycles == 15

@@ -1,1 +1,1 @@
-from .behavior import Role, Strategy, get_role_from_str
+from .behavior import Role, Strategy, get_role_from_str, get_str_from_role

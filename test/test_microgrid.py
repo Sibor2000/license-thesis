@@ -4,7 +4,7 @@ from mgts.behavior import Role
 
 
 def test_frequency():
-    micro = Microgrid(1, battery_operations=range(1, 2 * CHARGE_TIME_WINDOW + 2))
+    micro = Microgrid(1, battery_operations=list(range(1, 2 * CHARGE_TIME_WINDOW + 2)))
     expected_value = (
         (CHARGE_TIME_WINDOW / 2) * (1 + CHARGE_TIME_WINDOW)
     ) / CHARGE_TIME_WINDOW

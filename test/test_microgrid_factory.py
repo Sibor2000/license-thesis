@@ -4,7 +4,7 @@ import json
 
 def test_create_from_sheet():
     path = "./datasets/test.xlsx"
-    sheet_name = "MG1"
+    sheet_name = "0"
 
     mgf = MicrogridFactory(path=path)
 
@@ -13,7 +13,7 @@ def test_create_from_sheet():
     assert microgrid.consumed_energy == [0, 5, 15, 15, 15, 15, 15, 15, 15]
     assert microgrid.produced_energy == [0, 10, 15, 20, 25, 25, 25, 25, 25]
 
-    sheet_name = "MG2"
+    sheet_name = "1"
 
     microgrid = mgf.create_from_sheet(sheet_name=sheet_name)
 
@@ -29,7 +29,7 @@ def test_create_from_file():
     microgrids = mgf.create_from_file()
 
     assert len(microgrids) == 6
-    assert microgrids[0].id == "MG1"
+    assert microgrids[0].id == 0
     assert microgrids[0].charge_efficiency == 0.8
     assert microgrids[0].initial_stored_energy == 0
     assert microgrids[0].battery_lifetime_cycles == 15

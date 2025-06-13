@@ -5,7 +5,7 @@ from mgts.simulation.constants import (
     DEFAULT_BUY_THRESHOLD,
     E_MAX_LINES,
 )
-from mgts.behavior import Role, Strategy
+from mgts.behavior import Role, Strategy, get_str_from_role
 from mgts.exceptions import EndOfSimulationException
 
 
@@ -55,6 +55,14 @@ class Microgrid:
 
         #! Misc internal fields
         self.e_max_lines = e_max_lines
+
+        #! Internal fields for resetting
+        self.__reset_stored_energy = self.stored_energy.copy()
+        self.__reset_stored_energy_post_trade = self.stored_energy_post_trade.copy()
+        self.__reset_produced_energy = self.produced_energy.copy()
+        self.__reset_consumed_energy = self.consumed_energy.copy()
+        self.__reset_battery_operations = self.battery_operations.copy()
+        self.__reset_role = self.role.copy()
 
     def state(self, t):
         return self.produced_energy[t] + self.stored_energy[t] - self.consumed_energy[t]
@@ -196,7 +204,7 @@ class Microgrid:
             sell_desire = min(sell_desire, 1.0 * self.e_max_lines)
             buy_desire = min(buy_desire, 1.0 * self.e_max_lines)
 
-        return (sell_desire, buy_desire)
+        return (float(sell_desire), float(buy_desire))
 
     def resolve_trade(self, t, sell_buy_amount):
         self.stored_energy_post_trade.append(
@@ -227,3 +235,23 @@ class Microgrid:
         if self.role[t] == Role.HAWK:
             return 1.0 * self.role.count(Role.HAWK) / len(self.role)
         return 0
+
+    def reset(self):
+        self.stored_energy = self.__reset_stored_energy.copy()
+        self.stored_energy_post_trade = self.__reset_stored_energy_post_trade.copy()
+        self.produced_energy = self.__reset_produced_energy.copy()
+        self.consumed_energy = self.__reset_consumed_energy.copy()
+        self.battery_operations = self.__reset_battery_operations.copy()
+        self.role = self.__reset_role.copy()
+
+    def to_scenario_dict(self):
+        return {
+            "id":self.id,
+            "chargeEfficiency":self.charge_efficiency,
+            "dischargeEfficiency":self.discharge_efficiency,
+            "initialStored":self.initial_stored_energy,
+            "maxStored":self.max_stored_energy,
+            "initialRole":get_str_from_role(self.role[0]),
+            "production":self.produced_energy,
+            "consumption":self.consumed_energy
+        }

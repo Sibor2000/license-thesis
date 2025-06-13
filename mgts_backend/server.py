@@ -16,7 +16,9 @@ import matplotlib.pyplot as plt
 
 app = FastAPI()
 
-simulations = {}
+simulations:dict[str, MicrogridNetwork] = {}
+simulation_charts:dict[str, dict] = {}
+#simulation_charts["momentChartsList"] = []
 active_websockets: dict[str, WebSocket] = {}
 
 app.add_middleware(
@@ -92,17 +94,17 @@ def create_simulation(sim: SimulationRequest):
     mgn = MicrogridNetworkFactory.create_from_dict(filtered_data)
 
     simulations[id] = mgn
+    simulation_charts[id] = {}
+    simulation_charts[id]["momentChartsList"] = []
 
     # print(filtered_data["microgrids"][0]['chargeEfficiency'])
 
     return mgn
 
+async def step_time_and_send_charts(sim_id:str):
+    mgn:MicrogridNetwork = simulations[sim_id]
+    ws:WebSocket = active_websockets[sim_id]
 
-###
-# Testing stuff
-
-
-async def step_time_and_send_charts(ws: WebSocket, mgn: MicrogridNetwork):
     try:
         mgn.step_time()
     except EndOfSimulationException:
@@ -137,6 +139,15 @@ async def step_time_and_send_charts(ws: WebSocket, mgn: MicrogridNetwork):
     chart_ex_v_ex_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_exp_vs_exp)
     chart_runtime_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_runtime)
 
+    simulation_charts[sim_id]["simulationCharts"]=[chart_en_delta_b64, chart_ro_st_b64]
+    simulation_charts[sim_id]["momentChartsList"].append([
+        chart_ro_st_b64,
+        chart_glob_bf_b64,
+        chart_div_b64,
+        chart_ex_v_ex_b64,
+        chart_runtime_b64
+    ])
+
     await ws.send_json({
         "type":"charts",
         "simCharts":[
@@ -152,62 +163,37 @@ async def step_time_and_send_charts(ws: WebSocket, mgn: MicrogridNetwork):
         ]
     })
 
-@app.get("/test_ws/{sim_id}")
-async def test_ws(sim_id: str):
-    ws = active_websockets[sim_id]
-
-    # await ws.send_text("Booha")
-
-    mgs = []
-
-    sell_threshold = 55
-    buy_threshold = 45
-
-    dove_count = 80
-    hawk_count = 40
-
-    for i in range(0, dove_count):
-        mgs.append(
-            Microgrid(
-                id=i,
-                max_stored_energy=100,
-                initial_stored_energy=random.uniform(0, 100),
-                sell_threshold=sell_threshold,
-                buy_threshold=buy_threshold,
-                role=[Role.DOVE],
-                produced_energy=[0] * 100,
-                consumed_energy=[0] * 100,
-            )
-        )
-
-    print("Doves ready")
-
-    for i in range(dove_count, dove_count + hawk_count):
-        mgs.append(
-            Microgrid(
-                id=i,
-                max_stored_energy=100,
-                initial_stored_energy=random.uniform(0, 100),
-                sell_threshold=sell_threshold,
-                buy_threshold=buy_threshold,
-                role=[Role.HAWK],
-                produced_energy=[0] * 100,
-                consumed_energy=[0] * 100,
-            )
-        )
-
-    print("Hawks ready")
-
-    mgn = MicrogridNetwork(microgrids=mgs)
-
-    asyncio.create_task(step_time_and_send_charts(ws, mgn))
-
-
 @app.post("/simulation/{sim_id}/step")
 async def step_simulation_time(sim_id: str):
     mgn = simulations[sim_id]
     ws = active_websockets[sim_id]
 
-    asyncio.create_task(step_time_and_send_charts(ws, mgn))
+    asyncio.create_task(step_time_and_send_charts(sim_id))
 
     return {"message":"OK"}
+
+@app.post("/simulation/{sim_id}/reset")
+def reset_sim(sim_id: str):
+    mgn = simulations[sim_id]
+
+    mgn.reset()
+
+    simulation_charts[sim_id] = {}
+    simulation_charts[sim_id]["momentChartsList"] = []
+
+@app.get("/simulation/{sim_id}/charts")
+def send_simulation_charts(sim_id: str):
+    if sim_id in simulation_charts:
+        return simulation_charts[sim_id]
+    return {}
+
+@app.get("/simulation/{sim_id}/params/json")
+def send_simulation_params(sim_id:str):
+    if sim_id in simulations:
+        return simulations[sim_id].to_scenario_dict()
+
+    return None
+
+@app.get('/active_simulation_ids')
+def active_simulation_ids():
+    return list(simulations.keys())

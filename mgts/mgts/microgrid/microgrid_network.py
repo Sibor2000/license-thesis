@@ -8,10 +8,11 @@ import numpy as np
 from mgts.simulation.constants import E_MAX_LINES, FLOAT_ROUNDING_DECIMALS
 import math
 import csv
+import json
 
 
 class MicrogridNetwork:
-    def __init__(self, microgrids: list[Microgrid] = None, e_max_lines = E_MAX_LINES):
+    def __init__(self, microgrids: list[Microgrid] = None, e_max_lines=E_MAX_LINES):
         self.microgrids = microgrids if microgrids else []
         self.__time = 0
 
@@ -118,6 +119,7 @@ class MicrogridNetwork:
             )
 
             if microgrid.is_stable(self.__time):
+                print(f"MG {microgrid.id} is stable")
                 if not (stable_post_trade):
                     no_destabilised += 1
                 else:
@@ -205,13 +207,14 @@ class MicrogridNetwork:
 
     def find_optimal_trade(self):
         possible_trades = len(self.circumstance_arrays[self.__time])
-
-        full_scale = [trade.amount for trade in self.circumstance_arrays[self.__time]]
-
         print(f"{possible_trades} possible trades")
 
-        #If no one wants to trade
-        if possible_trades==0:
+        if any(microgrid.is_stable(self.__time) for microgrid in self.microgrids):
+            print("But everyone is stable!")
+            possible_trades = 0
+
+        # If no one wants to trade
+        if possible_trades == 0:
             self.models_global_histories.append({})
             self.models_diversities.append({})
             self.models_exploration.append({})
@@ -219,6 +222,8 @@ class MicrogridNetwork:
             self.models_runtimes.append({})
             self.decision_arrays.append(None)
             return
+
+        full_scale = [trade.amount for trade in self.circumstance_arrays[self.__time]]
 
         csv_write = False
         csv_file = None
@@ -233,12 +238,12 @@ class MicrogridNetwork:
 
         if custom_combos:
             combos = [
-                #TODO: calculate the best solutions params
+                # TODO: calculate the best solutions params
                 (200, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 25),
                 (200, 0.75, 0.025, "tournament", "uniform", False, "flip", False, 25),
                 (200, 0.95, 0.050, "tournament", "uniform", False, "flip", False, 25),
-                (200, 0.75, 0.050, "tournament", "uniform", False, "flip", False, 25)
-                ]
+                (200, 0.75, 0.050, "tournament", "uniform", False, "flip", False, 25),
+            ]
 
             combos = [
                 (20, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 10),
@@ -268,7 +273,7 @@ class MicrogridNetwork:
                 for ep in epoch
             ]
 
-        print(f"There are {len(combos)} in total")
+        print(f"There are {len(combos)} param combos in total")
 
         best_fits = {}
         diversities = {}
@@ -334,7 +339,7 @@ class MicrogridNetwork:
                         model2.history.list_diversity[-1],
                         model2.history.list_exploration[-1],
                         model2.history.list_exploitation[-1],
-                        sum(model2.history.list_epoch_time)
+                        sum(model2.history.list_epoch_time),
                     ]
                 )
 
@@ -353,7 +358,7 @@ class MicrogridNetwork:
     def execute_optimal_trade(self):
         decision = self.decision_arrays[self.__time]
 
-        #If no one wants to trade
+        # If no one wants to trade
         if decision is None:
             for microgrid in self.microgrids:
                 microgrid.resolve_trade(self.__time, (0, 0))
@@ -452,3 +457,40 @@ class MicrogridNetwork:
             )
             for trade in trades
         ]
+
+    def reset(self):
+        for microgrid in self.microgrids:
+            microgrid.reset()
+        self.__time = 0
+
+        self.circumstance_arrays: list[list[Trade]] = []
+        self.desires = []
+        self.decision_arrays = []
+
+        self.models_global_histories: list[dict] = []
+        self.models_diversities: list[dict] = []
+        self.models_exploration: list[dict] = []
+        self.models_exploitation: list[dict] = []
+        self.models_runtimes: list[dict] = []
+
+    def to_scenario_dict(self):
+        return {
+            "sellThreshold": self.microgrids[0].sell_threshold,
+            "buyThreshold": self.microgrids[0].buy_threshold,
+            "simulationDuration": min(
+                min(len(mg.produced_energy), len(mg.consumed_energy))
+                for mg in self.microgrids
+            ),
+            "nrOfMicrogrids": len(self.microgrids),
+            "eMax": self.e_max_lines,
+            "microgrids": [
+                microgrid.to_scenario_dict() for microgrid in self.microgrids
+            ],
+        }
+
+    def to_scenario_json(self)->str:
+        json.dumps(self.to_scenario_dict())
+
+    def save_scenario_json(self, path="scenario.json"):
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.to_scenario_dict(), f, indent=2)

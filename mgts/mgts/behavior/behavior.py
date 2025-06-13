@@ -15,3 +15,9 @@ def get_role_from_str(string:str):
         return Role[string.upper()]
     except KeyError:
         raise ValueError(f"Invalid string with value: {string}, no such role exists")
+
+def get_str_from_role(role:Role):
+    if(role == Role.DOVE):
+        return "Dove"
+
+    return "Hawk"

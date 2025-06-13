@@ -14,8 +14,8 @@
                 </button>
             </RouterLink>
 
-            <button>
-                Restart simulation
+            <button @click="resetSimulation">
+                Reset simulation
             </button>
         </div>
 
@@ -63,7 +63,6 @@ export default {
     data() {
         return {
             socket: null,
-            roleChart: null,
             simulationCharts: [],
             momentChartsList: [],
             activeTab: -1,
@@ -79,9 +78,6 @@ export default {
 
         this.socket.onmessage = (event) => {
             const msg = JSON.parse(event.data)
-            if (msg.type === "chart") {
-                this.roleChart = msg.data
-            }
 
             if (msg.type === "charts") {
                 this.simulationCharts = msg.simCharts
@@ -101,6 +97,8 @@ export default {
         this.socket.onclose = () => {
             console.log("WS closed")
         }
+
+        this.loadCharts()
     },
     beforeUnmount() {
         if (this.socket) {
@@ -113,6 +111,28 @@ export default {
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/step`)
 
                 console.log(response.data)
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async resetSimulation(){
+            try {
+                const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/reset`)
+
+                this.activeTab = -1
+                this.simulationCharts = []
+                this.momentChartsList = []
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async loadCharts(){
+            try {
+                const response = await axios.get(`http://localhost:8000/simulation/${this.$route.params.id}/charts`)
+                const data = response.data
+
+                this.momentChartsList = data.momentChartsList
+                this.simulationCharts = data.simulationCharts
             } catch (error) {
                 console.log(error)
             }
@@ -154,6 +174,7 @@ export default {
     flex-direction: column;
     align-items: center;
     padding: 2px;
+    gap: 5px;
 }
 
 .button-row {

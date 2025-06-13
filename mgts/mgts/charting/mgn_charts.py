@@ -29,16 +29,54 @@ class MicrogridNetworkCharts:
         #    label.set_rotation(45)
         axs_before.set_ylim(0, 1)
         axs_before.set_title("Initial energies")
-        axs_before.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
-        axs_before.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
+        #axs_before.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
+        #axs_before.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
 
         axs_after.bar(mg_ids, latest_energies, color="blue")
         axs_after.set_xlabel("Microgrid ids")
         axs_after.set_ylabel("Stored energy ratio")
         axs_after.set_ylim(0, 1)
         axs_after.set_title("Post trade energies")
-        axs_after.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
-        axs_after.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
+        #axs_after.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
+        #axs_after.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
+
+        for i, mg in enumerate(mgn.microgrids):
+            axs_before.hlines(
+                y=mg.sell_threshold/100.0,
+                xmin = i-0.3,
+                xmax = i+0.3,
+                color='green',
+                linestyle="--",
+                linewidth=2,
+                label="Sell threshold" if i==0 else None
+            )
+            axs_before.hlines(
+                y=mg.buy_threshold/100.0,
+                xmin = i-0.3,
+                xmax = i+0.3,
+                color='red',
+                linestyle="--",
+                linewidth=2,
+                label="Buy threshold" if i==0 else None
+            )
+            axs_after.hlines(
+                y=mg.sell_threshold/100.0,
+                xmin = i-0.3,
+                xmax = i+0.3,
+                color='green',
+                linestyle="--",
+                linewidth=2,
+                label="Sell threshold" if i==0 else None
+            )
+            axs_after.hlines(
+                y=mg.buy_threshold/100.0,
+                xmin = i-0.3,
+                xmax = i+0.3,
+                color='red',
+                linestyle="--",
+                linewidth=2,
+                label="Buy threshold" if i==0 else None
+            )
 
     def chart_role_and_strategy(mgn:MicrogridNetwork, axs, t:int=None):
         t = MicrogridNetworkCharts.check_time(mgn,t)

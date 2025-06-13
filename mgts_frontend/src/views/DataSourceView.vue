@@ -3,13 +3,16 @@
         Upload/Select and adjust a scenario
     </h2>
     <div class="outer-container">
+        <div>
+            <RouterLink to="/select_simulation">
+                <button>
+                    Back to simulation selection
+                </button>
+            </RouterLink>
+        </div>
         <div class="inner-container">
             <div class="config-option">
-                <input type="file" accept=".xlsx" @change="handleFileUpload" />
-
-                <button @click="handleFileUploadPick">
-                    Pick
-                </button>
+                <input type="file" accept=".json" @change="handleFileUpload" />
             </div>
             <div class="config-option" style="background-color: brown;">
                 <select v-model="selectedExampleConfig">
@@ -26,7 +29,7 @@
         </div>
 
         <div v-if="activeOption">
-            Selected option: {{ activeOption }}
+            Active option: {{ activeOption }}
         </div>
 
         <div class="config-zone">
@@ -43,25 +46,17 @@
                 </div>
             </div>
 
-            <div>
+            <div :key="dataSourceKey">
                 <SimulationConfigurationForm v-if="activeTab === -1" v-model:simulationDuration="simulationDuration"
                     v-model:nrOfMicrogrids="nrOfMicrogrids" v-model:sellThreshold="sellThreshold"
-                    v-model:buyThreshold="buyThreshold" v-model:eMax="eMax"/>
+                    v-model:buyThreshold="buyThreshold" v-model:eMax="eMax" />
                 <div v-for="index in nrOfMicrogrids">
-                    <MicrogridConfigurationForm v-if="activeTab==index-1" :simulation-duration="simulationDuration" v-model:micro-grid="microGridArray[index-1]"/>
+                    <MicrogridConfigurationForm v-if="activeTab == index - 1" :simulation-duration="simulationDuration"
+                        v-model:micro-grid="microGridArray[index - 1]" />
                 </div>
             </div>
         </div>
 
-        <!--
-        <div>
-            <RouterLink to="/adjust">
-                <button>
-                    Next
-                </button>
-            </RouterLink>
-        </div>
--->
         <div>
             <button @click="compileSimulationData">
                 Compile
@@ -79,7 +74,7 @@
 <script>
 import MicrogridConfigurationForm from '@/components/configuration-forms/MicrogridConfigurationForm.vue'
 import SimulationConfigurationForm from '@/components/configuration-forms/SimulationConfigurationForm.vue'
-import axios from 'axios'
+import api from '@/services/api'
 
 export default {
     data() {
@@ -95,42 +90,72 @@ export default {
             simulationDuration: 0,
             sellThreshold: 100,
             buyThreshold: 0,
-            eMax:0
+            eMax: 0,
+            dataSourceKey: 0,
         }
     },
     mounted() {
-        //this.loadMicroGrids()
-
         this.loadExampleConfigs()
+        this.loadCurrentSimulationParams()
     },
     methods: {
         handleFileUpload(event) {
             this.selectedFile = event.target.files[0]
-        },
-        handleFileUploadPick(event) {
-            this.activeOption = this.selectedFile.name
+
+            if (!this.selectedFile) {
+                return
+            }
+
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result)
+                    this.placeScenarioObject(parsed)
+                    this.activeOption = "File upload"
+                } catch (error) {
+                    console.log("Json parse error")
+                }
+            }
+
+            reader.readAsText(this.selectedFile)
         },
         async handleExampleScenarioPick(event) {
+            const response = await api.get(`/example_scenario/${this.selectedExampleConfig}`)
+
+            this.placeScenarioObject(response.data)
             this.activeOption = this.selectedExampleConfig
-
-            const response = await axios.get(`http://localhost:8000/example_scenario/${this.selectedExampleConfig}`)
-
-            const simulation = response.data
-            this.simulationDuration = simulation.simulationDuration
-            this.microGridArray = simulation.microgrids
-            this.nrOfMicrogrids = simulation.nrOfMicrogrids
-            this.buyThreshold = Number(simulation.buyThreshold)
-            this.sellThreshold = Number(simulation.sellThreshold)
-            this.eMax = Number(simulation.eMax)
+        },
+        placeScenarioObject(scenario) {
+            try {
+                this.simulationDuration = scenario.simulationDuration
+                this.microGridArray = scenario.microgrids
+                this.nrOfMicrogrids = scenario.nrOfMicrogrids
+                this.buyThreshold = Number(scenario.buyThreshold)
+                this.sellThreshold = Number(scenario.sellThreshold)
+                this.eMax = Number(scenario.eMax)
+                this.dataSourceKey +=1
+            } catch (error) {
+                console.log("Cannot parse scenario")
+            }
         },
         loadMicroGrids(mgArray) {
             this.microGridArray = mgArray
         },
         async loadExampleConfigs() {
-            const response = await axios.get('http://localhost:8000/example_scenario_ids')
+            const response = await api.get('/example_scenario_ids')
             this.exampleConfigs = response.data
         },
-        async compileSimulationData(){
+        async loadCurrentSimulationParams(){
+            const response = await api.get(`/simulation/${this.$route.params.id}/params/json`)
+
+            if (response.data === null){
+                return
+            }
+
+            this.placeScenarioObject(response.data)
+            this.activeOption = "Previous state"
+        },
+        async compileSimulationData() {
             const simulationData = {
                 id: this.$route.params.id,
                 sellThreshold: this.sellThreshold,
@@ -141,17 +166,8 @@ export default {
                 microgrids: this.microGridArray
             }
             console.log(simulationData)
-
-            /*
-            try {
-                const response = await axios.post('http://localhost:8000/create_simulation', simulationData)
-                console.log(response.data)
-            } catch (error) {
-                console.log(error)
-            }
-                */
         },
-        async submitAndRedirect(){
+        async submitAndRedirect() {
 
             const simulationId = this.$route.params.id
 
@@ -166,9 +182,9 @@ export default {
             }
 
             try {
-                const response = await axios.post('http://localhost:8000/create_simulation', simulationData)
+                const response = await api.post('/create_simulation', simulationData)
 
-                if(response.status === 200){
+                if (response.status === 200) {
                     this.$router.push(`/simulation/${simulationId}`)
                 }
 
@@ -186,7 +202,7 @@ export default {
             while (newVal > this.microGridArray.length) {
                 this.microGridArray.push({
                     id: this.microGridArray.length,
-                    production:[],
+                    production: [],
                     consumption: []
                 })
             }
@@ -223,6 +239,8 @@ export default {
     background-color: darkblue;
     width: 50%;
     height: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .config-zone {

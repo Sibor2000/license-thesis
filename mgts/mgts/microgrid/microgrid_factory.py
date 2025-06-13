@@ -70,7 +70,8 @@ class MicrogridFactory:
 
         for _, row in statcard.iterrows():
             microgrid = self.create_from_sheet(
-                row[microgrid_id_column],
+                microgrid_id=int(row[microgrid_id_column]),
+                sheet_name=str(int(row[microgrid_id_column])),
                 produced_energy_column=produced_energy_column,
                 consumed_energy_column=consumed_energy_column,
             )
