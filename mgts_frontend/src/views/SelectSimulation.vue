@@ -1,5 +1,9 @@
 <template>
     <div class="flex-container">
+        <Stepper :active-step="0"/>
+        <h3>
+            Create a new simulation or choose a previous one.
+        </h3>
         <div class="new-bar">
             <input v-model="newSimulationId" type="text" placeholder="Enter new sim id, or get a random id by default"
                 size="40">
@@ -34,6 +38,7 @@
 <script>
 import router from '@/router';
 import api from '@/services/api';
+import Stepper from '@/components/Stepper.vue';
 
 export default {
     data() {
@@ -59,6 +64,9 @@ export default {
     },
     mounted() {
         this.getActiveSimulations()
+    },
+    components:{
+        Stepper
     }
 }
 </script>
@@ -66,11 +74,12 @@ export default {
 <style scoped>
 .flex-container {
     display: flex;
-    justify-content: center;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     height: 50vh;
-    gap: 50px
+    gap: 50px;
+    margin: 15vh;
 }
 
 .sim-table {

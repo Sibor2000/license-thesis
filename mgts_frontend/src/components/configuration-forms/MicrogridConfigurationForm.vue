@@ -112,11 +112,14 @@ export default {
     flex-direction: column;
     justify-content: flex-start;
     flex-shrink: 20;
+    margin-left: 20px;
 }
 
 .measurement-box {
     display: flex;
     overflow-x: auto;
+    margin-left: 40px;
+    margin-right: 20px;
 }
 
 .small-input {
