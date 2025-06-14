@@ -1,18 +1,32 @@
 <template>
-    <h2>Run the simulation</h2>
-
     <div class="outer-container">
 
-        <div class="sim-controll-button-row">
-            <button @click="stepTime()">
-                Step time
-            </button>
 
+        <Stepper :active-step="2" />
+
+        <h3>
+            Run the simulation by clicking 'Step time'. Check out chart to gain insight and reset simulation to re-run.
+        </h3>
+
+        <h4>
+            On every time step, all the microgrids do the following:
+            <h4>- Calculate internal energy based on leftover energy, production and consumption.</h4>
+            <h4>- Engage in trade with other microgrids. Optimized by the GA.</h4>
+            <h4>- Calculate new role.</h4>
+        </h4>
+
+        <div class="sim-controll-button-row">
             <RouterLink :to="`/datasource/${this.$route.params.id}`">
                 <button>
                     Back to configuration
                 </button>
             </RouterLink>
+        </div>
+
+        <div class="sim-controll-button-row">
+            <button @click="stepTime()">
+                Step time
+            </button>
 
             <button @click="resetSimulation">
                 Reset simulation
@@ -39,12 +53,12 @@
             </div>
 
             <div>
-                <div v-if="activeTab ===-1" class="chart-column">
+                <div v-if="activeTab === -1" class="chart-column">
                     <img v-for="simChart in simulationCharts" :src="'data:image/png;base64,' + simChart" />
                 </div>
 
                 <div v-for="(momentCharts, index) in momentChartsList">
-                    <div v-if="activeTab===index" class="chart-column">
+                    <div v-if="activeTab === index" class="chart-column">
                         <img v-for="momentChart in momentCharts" :src="'data:image/png;base64,' + momentChart" />
                     </div>
                 </div>
@@ -56,6 +70,7 @@
 </template>
 
 <script>
+import Stepper from '@/components/Stepper.vue'
 import axios from 'axios'
 
 export default {
@@ -66,7 +81,7 @@ export default {
             simulationCharts: [],
             momentChartsList: [],
             activeTab: -1,
-            wsTextMessage:null
+            wsTextMessage: null
         }
     },
     mounted() {
@@ -115,7 +130,7 @@ export default {
                 console.log(error)
             }
         },
-        async resetSimulation(){
+        async resetSimulation() {
             try {
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/reset`)
 
@@ -126,7 +141,7 @@ export default {
                 console.log(error)
             }
         },
-        async loadCharts(){
+        async loadCharts() {
             try {
                 const response = await axios.get(`http://localhost:8000/simulation/${this.$route.params.id}/charts`)
                 const data = response.data
@@ -137,6 +152,9 @@ export default {
                 console.log(error)
             }
         }
+    },
+    components: {
+        Stepper
     }
 }
 </script>
@@ -156,6 +174,7 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     width: 75vb;
+    background-color: pink;
 }
 
 .config-zone {
