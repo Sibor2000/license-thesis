@@ -1,70 +1,75 @@
 <template>
     <div class="outer-container">
+        <div class="inner-container">
+            <Stepper :active-step="2" />
 
+            <h3>
+                Run the simulation by clicking 'Step time'. Check out chart to gain insight and reset simulation to
+                re-run.
+            </h3>
 
-        <Stepper :active-step="2" />
+            <h4>On every time step, all the microgrids do the following:</h4>
+            <ul>
+                <li>Calculate internal energy based on leftover energy, production and consumption.</li>
+                <li>Engage in trade with other microgrids. Optimized by the GA.</li>
+                <li>Calculate new role.</li>
+            </ul>
 
-        <h3>
-            Run the simulation by clicking 'Step time'. Check out chart to gain insight and reset simulation to re-run.
-        </h3>
-
-        <h4>
-            On every time step, all the microgrids do the following:
-            <h4>- Calculate internal energy based on leftover energy, production and consumption.</h4>
-            <h4>- Engage in trade with other microgrids. Optimized by the GA.</h4>
-            <h4>- Calculate new role.</h4>
-        </h4>
-
-        <div class="sim-controll-button-row">
-            <RouterLink :to="`/datasource/${this.$route.params.id}`">
-                <button>
-                    Back to configuration
-                </button>
-            </RouterLink>
-        </div>
-
-        <div class="sim-controll-button-row">
-            <button @click="stepTime()">
-                Step time
-            </button>
-
-            <button @click="resetSimulation">
-                Reset simulation
-            </button>
-        </div>
-
-        <div v-if="wsTextMessage">
-            {{ wsTextMessage }}
-        </div>
-
-        <div class="config-zone">
-            <div class="button-row">
-                <div>
-                    <button @click="activeTab = -1">
-                        Simulation
+            <div class="sim-controll-button-row">
+                <RouterLink :to="`/datasource/${this.$route.params.id}`">
+                    <button class="button">
+                        Back to configuration
                     </button>
-                </div>
-
-                <div v-for="(_, index) in momentChartsList">
-                    <button @click="activeTab = index">
-                        {{ index }}
-                    </button>
-                </div>
+                </RouterLink>
             </div>
 
-            <div>
-                <div v-if="activeTab === -1" class="chart-column">
-                    <img v-for="simChart in simulationCharts" :src="'data:image/png;base64,' + simChart" />
+            <div class="sim-controll-button-row">
+                <button @click="stepTime()" class="button">
+                    Step time
+                </button>
+
+                <button @click="resetSimulation" class="button">
+                    Reset simulation
+                </button>
+            </div>
+
+            <div class="loader" v-if="performingStep">
+            </div>
+
+            <div v-if="wsTextMessage">
+                {{ wsTextMessage }}
+            </div>
+
+            <div class="config-zone">
+                <div class="button-row">
+                    <div>
+                        <button @click="activeTab = -1"
+                        :class="['button-tertiary', { 'active-tab': activeTab === -1 }]">
+                            Simulation
+                        </button>
+                    </div>
+
+                    <div v-for="(_, index) in momentChartsList">
+                        <button @click="activeTab = index"
+                        :class="['button-tertiary', { 'active-tab': activeTab === index }]">
+                            {{ index }}
+                        </button>
+                    </div>
                 </div>
 
-                <div v-for="(momentCharts, index) in momentChartsList">
-                    <div v-if="activeTab === index" class="chart-column">
-                        <img v-for="momentChart in momentCharts" :src="'data:image/png;base64,' + momentChart" />
+                <div>
+                    <div v-if="activeTab === -1" class="chart-column">
+                        <img v-for="simChart in simulationCharts" :src="'data:image/png;base64,' + simChart" />
+                    </div>
+
+                    <div v-for="(momentCharts, index) in momentChartsList">
+                        <div v-if="activeTab === index" class="chart-column">
+                            <img v-for="momentChart in momentCharts" :src="'data:image/png;base64,' + momentChart" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
 </template>
@@ -81,7 +86,8 @@ export default {
             simulationCharts: [],
             momentChartsList: [],
             activeTab: -1,
-            wsTextMessage: null
+            wsTextMessage: null,
+            performingStep: false
         }
     },
     mounted() {
@@ -93,6 +99,8 @@ export default {
 
         this.socket.onmessage = (event) => {
             const msg = JSON.parse(event.data)
+
+            this.performingStep = false
 
             if (msg.type === "charts") {
                 this.simulationCharts = msg.simCharts
@@ -123,7 +131,9 @@ export default {
     methods: {
         async stepTime() {
             try {
+                this.performingStep=true
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/step`)
+
 
                 console.log(response.data)
             } catch (error) {
@@ -157,49 +167,86 @@ export default {
         Stepper
     }
 }
+
 </script>
 
 <style scoped>
-.outer-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    height: 100%;
-    margin: 15vh;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+h3,
+h4 {
+    color: #b2ebf2;
+    text-align: center;
+    margin: 0.5rem 0;
+    font-weight: 500;
 }
 
 .sim-controll-button-row {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 75vb;
-    background-color: pink;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sim-controll-button-row button:hover,
+.button-row button:hover {
+    background-color: #00acc1;
 }
 
 .config-zone {
     display: flex;
     flex-direction: column;
-    background-color: blueviolet;
+    background-color: #263238;
+    border-radius: 12px;
+    padding: 1rem;
     width: 100%;
-    height: 100%;
 }
 
 .chart-column {
     display: flex;
-    background-color: pink;
-    height: 100%;
-    width: 100%;
     flex-direction: column;
     align-items: center;
-    padding: 2px;
-    gap: 5px;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #37474f;
+    border-radius: 8px;
 }
 
-.button-row {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 4px;
+.chart-column img {
+    max-width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
+
+ul {
+    color: #b2ebf2;
+    padding-left: 1.2rem;
+    list-style-type: disc;
+    margin: 0;
+}
+
+li {
+    margin: 0.4rem 0;
+}
+
+.loader{
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #00d1ff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin{
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+}
+
+.active-tab {
+    background-color: #2c7b84;
+    color: #fff;
+}
+
 </style>

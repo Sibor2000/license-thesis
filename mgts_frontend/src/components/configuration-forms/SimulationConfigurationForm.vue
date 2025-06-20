@@ -91,3 +91,43 @@ methods: {
 }
 }
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:host {
+  font-family: 'Inter', sans-serif;
+  color: #e0f7fa;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  color: #80deea;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+input[type="number"] {
+  background-color: #37474f;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  color: white;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 300px;
+  transition: background-color 0.2s ease;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  background-color: #455a64;
+}
+
+br {
+  display: none;
+}
+
+</style>

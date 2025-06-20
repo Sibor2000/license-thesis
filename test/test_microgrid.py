@@ -80,3 +80,32 @@ def test_is_energy_stabilising():
     assert not (microgrid.is_stable(t=0))
     assert not (microgrid.is_energy_stabilising(t=0, sell_buy_amount=(50 * 0.2, 0)))
     assert microgrid.is_energy_stabilising(t=0, sell_buy_amount=(20 * 0.2, 0))
+
+
+def test_dove_chance():
+    microgrid = Microgrid(
+        1,
+        stored_energy_post_trade=[0],
+        max_stored_energy=100,
+        sell_threshold=66,
+        buy_threshold=33,
+    )
+    assert microgrid.calculate_dove_chance(t=0) == 0.0
+
+    microgrid.stored_energy_post_trade = [25]
+    assert microgrid.calculate_dove_chance(t=0) > 0.0
+    assert microgrid.calculate_dove_chance(t=0) < 1.0
+
+    microgrid.stored_energy_post_trade = [50]
+    assert microgrid.calculate_dove_chance(t=0) == 1.0
+
+    microgrid.stored_energy_post_trade = [75]
+    assert microgrid.calculate_dove_chance(t=0) > 0.0
+    assert microgrid.calculate_dove_chance(t=0) < 1.0
+
+    microgrid.stored_energy_post_trade = [100]
+    assert microgrid.calculate_dove_chance(t=0) == 0.0
+
+    microgrid.stored_energy_post_trade = [16.5]
+    assert microgrid.calculate_dove_chance(t=0) == 0.5
+

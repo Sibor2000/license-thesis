@@ -7,7 +7,7 @@ from mgts.simulation.constants import (
 )
 from mgts.behavior import Role, Strategy, get_str_from_role
 from mgts.exceptions import EndOfSimulationException
-
+import random
 
 class Microgrid:
     def __init__(
@@ -222,13 +222,35 @@ class Microgrid:
             )
         )
 
-    def calculate_next_role(self):
+    def calculate_dove_chance(self, t:int)->float:
+        battery_percent = (self.stored_energy_post_trade[t] / self.max_stored_energy) * 100
+
+        if(battery_percent <= self.sell_threshold and battery_percent >= self.buy_threshold):
+            return 1.0
+
+        if(self.buy_threshold==0 or self.sell_threshold==100):
+            return 0
+
+        if(battery_percent < self.buy_threshold):
+            return (1.0/self.buy_threshold) * battery_percent
+
+        if(battery_percent > self.sell_threshold):
+            return ((battery_percent - 100.0)/(self.sell_threshold-100.0))
+
+        return 0
+
+    def calculate_next_role(self , t):
         #self.role.append(self.role.append(self.role[0]))
 
-        if self.role[-1]==Role.DOVE:
-            self.role.append(Role.HAWK)
-        else:
+        #if self.role[-1]==Role.DOVE:
+            #self.role.append(Role.HAWK)
+        #else:
+            #self.role.append(Role.DOVE)
+
+        if random.random() < self.calculate_dove_chance(t):
             self.role.append(Role.DOVE)
+        else:
+            self.role.append(Role.HAWK)
 
     def cost_strategy(self, t: int):
         # TODO: change

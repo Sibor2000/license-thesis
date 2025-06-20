@@ -1,39 +1,41 @@
 <template>
-    <div class="flex-container">
-        <Stepper :active-step="0"/>
-        <h3>
-            Create a new simulation or choose a previous one.
-        </h3>
-        <div class="new-bar">
-            <input v-model="newSimulationId" type="text" placeholder="Enter new sim id, or get a random id by default"
-                size="40">
+    <div class="outer-container">
+        <div class="inner-container-small">
+            <div>
+                <Stepper :active-step="0" />
+            </div>
+            <h3 class="heading">
+                Create a new simulation or choose a previous one.
+            </h3>
 
-            <button @click="handleNewSimulation">New</button>
+            <div class="new-bar">
+                <input v-model="newSimulationId" type="text" placeholder="Enter new sim ID or leave blank for random id"
+                    class="input" />
+                <button class="button" @click="handleNewSimulation">New</button>
+            </div>
+
+            <table class="sim-table">
+                <thead>
+                    <tr>
+                        <th>Simulation ID</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in activeSimulations" :key="index">
+                        <td>{{ item }}</td>
+                        <td>
+                            <RouterLink :to="`/datasource/${item}`">
+                                <button class="button small">Load</button>
+                            </RouterLink>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <table class="sim-table">
-            <thead>
-                <tr>
-                    <th>
-                        Simulation id
-                    </th>
-                    <th>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in this.activeSimulations" :key="index">
-                    <td>{{ item }}</td>
-                    <td>
-                        <RouterLink :to="`/datasource/${item}`">
-                            <button>Load</button>
-                        </RouterLink>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
     </div>
 </template>
+
 
 <script>
 import router from '@/router';
@@ -65,58 +67,72 @@ export default {
     mounted() {
         this.getActiveSimulations()
     },
-    components:{
+    components: {
         Stepper
     }
 }
 </script>
 
 <style scoped>
-.flex-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 50vh;
-    gap: 50px;
-    margin: 15vh;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-.sim-table {
-    width: 50%;
-    border-collapse: collapse;
-}
-
-.sim-table td,
-.sim-table th {
-    border: 2px solid;
-    border-color: gray;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-}
-
-.sim-table td:nth-child(1),
-.sim-table th:nth-child(1) {
-    border-right: none;
-    text-align: start;
-}
-
-.sim-table td:nth-child(2),
-.sim-table th:nth-child(2) {
-    border-left: none;
-    text-align: end;
-}
-
-.sim-table tr {
-    width: 100%;
+.heading {
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-align: center;
+    margin: 2rem 0 1rem;
+    color: #cfd8dc;
 }
 
 .new-bar {
     display: flex;
-    justify-content: flex-end;
-    width: 50%;
-    gap: 10px;
+    justify-content: end;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    width: 100%;
+    justify-self: end;
+}
+
+.input {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    background-color: #ffffff10;
+    color: #fff;
+    outline: none;
+}
+
+.input::placeholder {
+    color: #ccc;
+}
+
+.button.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.sim-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.sim-table th,
+.sim-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #ffffff22;
+    text-align: left;
+}
+
+.sim-table th {
+    color: #90a4ae;
+    font-weight: 600;
+}
+
+.sim-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 </style>

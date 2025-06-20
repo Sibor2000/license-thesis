@@ -119,7 +119,6 @@ class MicrogridNetwork:
             )
 
             if microgrid.is_stable(self.__time):
-                print(f"MG {microgrid.id} is stable")
                 if not (stable_post_trade):
                     no_destabilised += 1
                 else:
@@ -209,7 +208,7 @@ class MicrogridNetwork:
         possible_trades = len(self.circumstance_arrays[self.__time])
         print(f"{possible_trades} possible trades")
 
-        if any(microgrid.is_stable(self.__time) for microgrid in self.microgrids):
+        if all(microgrid.is_stable(self.__time) for microgrid in self.microgrids):
             print("But everyone is stable!")
             possible_trades = 0
 
@@ -397,7 +396,7 @@ class MicrogridNetwork:
 
     def calculate_roles(self):
         for microgrid in self.microgrids:
-            microgrid.calculate_next_role()
+            microgrid.calculate_next_role(self.__time)
 
     def step_time(self):
         print("Internal energy calculations")

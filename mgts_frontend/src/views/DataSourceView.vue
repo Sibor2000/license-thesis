@@ -1,29 +1,30 @@
 <template>
     <div class="outer-container">
-        <Stepper :active-step="1" />
+        <div class="inner-container">
 
-        <div>
-            <h3>
-                Adjust the parameters for the simulation and the optimizer.
-            </h3>
-            <h3>
-                Upload your own, pick one from the example scenarios or build your own.
-            </h3>
-        </div>
+            <Stepper :active-step="1" />
 
-        <div class="config-zone">
+            <div>
+                <h3>
+                    Adjust the parameters for the simulation and the optimizer.
+                </h3>
+                <h3>
+                    Upload your own, pick one from the example scenarios or build your own.
+                </h3>
+            </div>
+
             <div class="nav-button-row">
-                <RouterLink to="/select_simulation" class="nav-button">
-                    <button>
+                <RouterLink to="/select_simulation">
+                    <button class="button">
                         Back to simulation selection
                     </button>
                 </RouterLink>
-                <button @click="submitAndRedirect">
+                <button @click="submitAndRedirect" class="button">
                     Set & Next
                 </button>
             </div>
 
-            <div class="inner-container">
+            <div class="load-preset-container">
                 <div class="config-option">
                     <input type="file" accept=".json" @change="handleFileUpload" />
                 </div>
@@ -35,7 +36,7 @@
                         </option>
                     </select>
 
-                    <button @click="handleExampleScenarioPick">
+                    <button @click="handleExampleScenarioPick" class="button">
                         Pick
                     </button>
                 </div>
@@ -49,12 +50,14 @@
                 <h4>Adjust parameters</h4>
                 <div class="button-row">
                     <div>
-                        <button @click="activeTab = -1">
+                        <button @click="activeTab = -1"
+                            :class="['button-tertiary', { 'active-tab': activeTab === -1 }]">
                             Simulation parameters
                         </button>
                     </div>
                     <div v-for="index in nrOfMicrogrids">
-                        <button @click="activeTab = index - 1">
+                        <button @click="activeTab = index - 1"
+                            :class="['button-tertiary', { 'active-tab': activeTab === index - 1 }]">
                             {{ microGridArray?.[index - 1]?.id }}
                         </button>
                     </div>
@@ -74,7 +77,7 @@
         </div>
 
         <div>
-            <button @click="compileSimulationData">
+            <button @click="compileSimulationData" class="button">
                 Compile
             </button>
         </div>
@@ -225,70 +228,71 @@ export default {
 </script>
 
 <style scoped>
-.inner-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    height: 20vb;
-    max-height: 20px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+h3 {
+    font-size: 1.25rem;
+    margin: 0.3rem 0;
+    text-align: center;
+    color: #e0f7fa;
 }
 
-.outer-container {
+.load-preset-container {
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    height: 50vh;
-    margin: 15vh;
-    gap: 50px
-}
-
-.next-button {
-    justify-self: right;
-}
-
-.config-option {
-    width: 50%;
-    height: 100%;
-    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
     justify-content: center;
 }
 
-.param-zone {
+.config-option {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
-    background-color: darkslategray;
+    align-items: center;
+    gap: 0.75rem;
 }
 
-.button-row {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 4px;
+input[type="file"],
+select {
+    background-color: #37474f;
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: none;
+    width: 220px;
+    font-size: 1rem;
 }
 
 .nav-button-row {
     display: flex;
-    flex-direction: row;
-    justify-content: end;
-    width: 80%;
-    gap: 10px;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-.nav-button {
-    align-self: flex-end;
+.param-zone {
+    background-color: #263238;
+    padding: 1rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.config-zone {
-    width: 100%;
-    height: 100%;
+.param-zone h4 {
+    margin: 0;
+    color: #80deea;
+    font-size: 1.1rem;
 }
 
 .active-option {
     text-align: center;
+    font-weight: 500;
+    color: #a7ffeb;
+}
+
+
+.active-tab {
+    background-color: #2c7b84;
+    color: #fff;
 }
 </style>
