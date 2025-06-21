@@ -38,12 +38,12 @@
             </div>
         </div>
 
-        <div class="measurement-box">
-            <table border="1">
+        <div class="table-box">
+            <table border="1" class="param-table">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th v-for="time in simulationDuration">
+                        <th class="param-table-cell param-table-header"></th>
+                        <th v-for="time in simulationDuration" class="param-table-cell param-table-header">
                             {{ time - 1 }}
                         </th>
                     </tr>
@@ -51,19 +51,19 @@
 
                 <tbody>
                     <tr>
-                        <td>
+                        <td class="param-table-cell param-table-label">
                             Production
                         </td>
-                        <td v-for="time in simulationDuration">
+                        <td v-for="time in simulationDuration" class="param-table-cell">
                             <input class="small-input" type="number"
                                 v-model.number="localMicroGridData.production[time - 1]"></input>
                         </td>
                     </tr>
                     <tr>
-                        <td>
+                        <td class="param-table-cell param-table-label">
                             Consumption
                         </td>
-                        <td v-for="time in simulationDuration">
+                        <td v-for="time in simulationDuration" class="param-table-cell">
                             <input class="small-input" type="number"
                                 v-model.number="localMicroGridData.consumption[time - 1]"></input>
                         </td>
@@ -120,15 +120,6 @@ export default {
     color: #e0f7fa;
 }
 
-/*
-@media (min-width: 768px) {
-  .outer-box {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-  */
-
 .microgrid-stat-box {
     display: flex;
     flex-direction: column;
@@ -158,53 +149,6 @@ export default {
 .microgrid-stat-box select:focus {
     outline: none;
     background-color: #455a64;
-}
-
-.measurement-box {
-    overflow-x: auto;
-    background-color: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
-    padding: 1rem;
-    flex-grow: 1;
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    color: #fff;
-    font-size: 0.95rem;
-}
-
-th,
-td {
-    padding: 0.5rem;
-    text-align: center;
-    border: 1px solid #607d8b;
-}
-
-th {
-    background-color: #263238;
-    font-weight: 600;
-}
-
-td:first-child {
-    font-weight: 600;
-    background-color: #37474f;
-    color: #b2ebf2;
-}
-
-.small-input {
-    width: 60px;
-    padding: 0.25rem;
-    background-color: #455a64;
-    color: white;
-    border: none;
-    border-radius: 4px;
-}
-
-.small-input:focus {
-    outline: none;
-    background-color: #546e7a;
 }
 
 .mg-properties {

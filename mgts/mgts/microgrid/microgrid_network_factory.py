@@ -1,4 +1,5 @@
 from mgts.microgrid import MicrogridFactory, MicrogridNetwork
+from mgts.optimizer import GAParamsFactory
 
 
 class MicrogridNetworkFactory:
@@ -30,9 +31,10 @@ class MicrogridNetworkFactory:
 
         return MicrogridNetwork(microgrids=microgrids)
 
-    def create_from_dict(
-        simulationDict
-    )->MicrogridNetwork:
+    def create_from_dict(simulationDict) -> MicrogridNetwork:
         microgrids = MicrogridFactory.create_from_dict(simulationDict)
-        return MicrogridNetwork(microgrids=microgrids, e_max_lines=simulationDict["eMax"])
-
+        return MicrogridNetwork(
+            microgrids=microgrids,
+            e_max_lines=simulationDict["eMax"],
+            ga_params=GAParamsFactory.create_from_dict(simulationDict),
+        )

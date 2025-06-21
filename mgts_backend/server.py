@@ -83,10 +83,8 @@ def example_scenario_ids():
 
 @app.post("/create_simulation")
 def create_simulation(sim: SimulationRequest):
-
-    # sim_model = SimulationModel(**sim.model_copy(exclude={'id'}))
-
     data = sim.model_dump()
+
     filtered_data = {k: v for k, v in data.items() if k != "id"}
     sim_model = SimulationModel(**filtered_data)
     id = data["id"]

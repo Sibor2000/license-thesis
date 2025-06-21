@@ -1,6 +1,154 @@
 [
     {
-        "id": "120mg",
+        "id": "4mg tester",
+        "sellThreshold": 55,
+        "buyThreshold": 45,
+        "simulationDuration": 5,
+        "nrOfMicrogrids": 4,
+        "eMax": 5,
+        "microgrids": [
+            {
+                "id": 0,
+                "chargeEfficiency": 1,
+                "dischargeEfficiency": 1,
+                "initialStored": 0,
+                "maxStored": 100,
+                "initialRole": "Dove",
+                "production": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "consumption": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "id": 1,
+                "chargeEfficiency": 1,
+                "dischargeEfficiency": 1,
+                "initialStored": 0,
+                "maxStored": 100,
+                "initialRole": "Dove",
+                "production": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "consumption": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "id": 2,
+                "chargeEfficiency": 1,
+                "dischargeEfficiency": 1,
+                "initialStored": 0,
+                "maxStored": 100,
+                "initialRole": "Dove",
+                "production": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "consumption": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "id": 3,
+                "chargeEfficiency": 1,
+                "dischargeEfficiency": 1,
+                "initialStored": 0,
+                "maxStored": 100,
+                "initialRole": "Hawk",
+                "production": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "consumption": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            }
+        ],
+        "gaParams": [
+            {
+                "id": "0.95 - 0.025",
+                "pop_size": 200,
+                "pc": 0.95,
+                "pm": 0.025,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            },
+            {
+                "id": "0.75 - 0.025",
+                "pop_size": 200,
+                "pc": 0.75,
+                "pm": 0.025,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            },
+            {
+                "id": "0.95 - 0.05",
+                "pop_size": 200,
+                "pc": 0.95,
+                "pm": 0.05,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            },
+            {
+                "id": "0.75 - 0.05",
+                "pop_size": 200,
+                "pc": 0.75,
+                "pm": 0.05,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            }
+        ]
+    },
+    {
+        "id": "4mg edge cases",
         "sellThreshold": 55,
         "buyThreshold": 45,
         "simulationDuration": 5,
@@ -98,106 +246,7 @@
         ]
     },
     {
-        "id": "1mg",
-        "sellThreshold": 85,
-        "buyThreshold": 25,
-        "simulationDuration": 5,
-        "nrOfMicrogrids": 4,
-        "eMax": 5,
-        "microgrids": [
-            {
-                "id": 0,
-                "chargeEfficiency": 1,
-                "dischargeEfficiency": 1,
-                "initialStored": 0,
-                "maxStored": 88,
-                "initialRole": "Dove",
-                "production": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ],
-                "consumption": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ]
-            },
-            {
-                "id": 1,
-                "chargeEfficiency": 1,
-                "dischargeEfficiency": 1,
-                "initialStored": 0,
-                "maxStored": 100,
-                "initialRole": "Dove",
-                "production": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ],
-                "consumption": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ]
-            },
-            {
-                "id": 2,
-                "chargeEfficiency": 1,
-                "dischargeEfficiency": 1,
-                "initialStored": 0,
-                "maxStored": 100,
-                "initialRole": "Dove",
-                "production": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ],
-                "consumption": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ]
-            },
-            {
-                "id": 3,
-                "chargeEfficiency": 1,
-                "dischargeEfficiency": 1,
-                "initialStored": 0,
-                "maxStored": 100,
-                "initialRole": "Hawk",
-                "production": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ],
-                "consumption": [
-                    47,
-                    0,
-                    0,
-                    0,
-                    69,
-                    100
-                ]
-            }
-        ]
-    },
-    {
-        "id": "Big 120 MG",
+        "id": "120 MG main",
         "sellThreshold": 55,
         "buyThreshold": 45,
         "simulationDuration": 10,
@@ -4043,6 +4092,56 @@
                     0,
                     0
                 ]
+            }
+        ],
+        "gaParams": [
+            {
+                "id": "0.95 - 0.025",
+                "pop_size": 200,
+                "pc": 0.95,
+                "pm": 0.025,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            },
+            {
+                "id": "0.75 - 0.025",
+                "pop_size": 200,
+                "pc": 0.75,
+                "pm": 0.025,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            },
+            {
+                "id": "0.95 - 0.05",
+                "pop_size": 200,
+                "pc": 0.95,
+                "pm": 0.05,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
+            },
+            {
+                "id": "0.75 - 0.05",
+                "pop_size": 200,
+                "pc": 0.75,
+                "pm": 0.05,
+                "sel": "tournament",
+                "cros": "uniform",
+                "mp": false,
+                "mut": "flip",
+                "ss": false,
+                "ep": 25
             }
         ]
     }

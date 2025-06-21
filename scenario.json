@@ -7,7 +7,7 @@
   "microgrids": [
     {
       "id": 0,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 63.942679845788376,
       "maxStored": 100,
@@ -39,7 +39,7 @@
     },
     {
       "id": 1,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 2.5010755222666936,
       "maxStored": 100,
@@ -71,7 +71,7 @@
     },
     {
       "id": 2,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 27.502931836911927,
       "maxStored": 100,
@@ -103,7 +103,7 @@
     },
     {
       "id": 3,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 22.321073814882276,
       "maxStored": 100,
@@ -135,7 +135,7 @@
     },
     {
       "id": 4,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 73.64712141640123,
       "maxStored": 100,
@@ -167,7 +167,7 @@
     },
     {
       "id": 5,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 67.66994874229113,
       "maxStored": 100,
@@ -199,7 +199,7 @@
     },
     {
       "id": 6,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 89.21795677048453,
       "maxStored": 100,
@@ -231,7 +231,7 @@
     },
     {
       "id": 7,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 8.693883262941615,
       "maxStored": 100,
@@ -263,7 +263,7 @@
     },
     {
       "id": 8,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 42.192181968527045,
       "maxStored": 100,
@@ -295,7 +295,7 @@
     },
     {
       "id": 9,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 2.9797219438070344,
       "maxStored": 100,
@@ -327,7 +327,7 @@
     },
     {
       "id": 10,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 21.863797480360336,
       "maxStored": 100,
@@ -359,7 +359,7 @@
     },
     {
       "id": 11,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 50.53552881033624,
       "maxStored": 100,
@@ -391,7 +391,7 @@
     },
     {
       "id": 12,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 2.6535969683863625,
       "maxStored": 100,
@@ -423,7 +423,7 @@
     },
     {
       "id": 13,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 19.88376506866485,
       "maxStored": 100,
@@ -455,7 +455,7 @@
     },
     {
       "id": 14,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 64.98844377795233,
       "maxStored": 100,
@@ -487,7 +487,7 @@
     },
     {
       "id": 15,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 54.49414806032167,
       "maxStored": 100,
@@ -519,7 +519,7 @@
     },
     {
       "id": 16,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 22.044062204069668,
       "maxStored": 100,
@@ -551,7 +551,7 @@
     },
     {
       "id": 17,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 58.92656838759087,
       "maxStored": 100,
@@ -583,7 +583,7 @@
     },
     {
       "id": 18,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 80.94304566778267,
       "maxStored": 100,
@@ -615,7 +615,7 @@
     },
     {
       "id": 19,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 0.6498759678061017,
       "maxStored": 100,
@@ -647,7 +647,7 @@
     },
     {
       "id": 20,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 80.58192518328079,
       "maxStored": 100,
@@ -679,7 +679,7 @@
     },
     {
       "id": 21,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 69.81393949882269,
       "maxStored": 100,
@@ -711,7 +711,7 @@
     },
     {
       "id": 22,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 34.02505165179919,
       "maxStored": 100,
@@ -743,7 +743,7 @@
     },
     {
       "id": 23,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 15.547949981178155,
       "maxStored": 100,
@@ -775,7 +775,7 @@
     },
     {
       "id": 24,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 95.72130722067811,
       "maxStored": 100,
@@ -807,7 +807,7 @@
     },
     {
       "id": 25,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 33.65945451126267,
       "maxStored": 100,
@@ -839,7 +839,7 @@
     },
     {
       "id": 26,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 9.27458433801479,
       "maxStored": 100,
@@ -871,7 +871,7 @@
     },
     {
       "id": 27,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 9.6716376833464,
       "maxStored": 100,
@@ -903,7 +903,7 @@
     },
     {
       "id": 28,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 84.74943663474598,
       "maxStored": 100,
@@ -935,7 +935,7 @@
     },
     {
       "id": 29,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 60.37260313668911,
       "maxStored": 100,
@@ -967,7 +967,7 @@
     },
     {
       "id": 30,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 80.71282732743802,
       "maxStored": 100,
@@ -999,7 +999,7 @@
     },
     {
       "id": 31,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 72.9731786693818,
       "maxStored": 100,
@@ -1031,7 +1031,7 @@
     },
     {
       "id": 32,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 53.62280914547007,
       "maxStored": 100,
@@ -1063,7 +1063,7 @@
     },
     {
       "id": 33,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 97.31157639793706,
       "maxStored": 100,
@@ -1095,7 +1095,7 @@
     },
     {
       "id": 34,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 37.853437720835345,
       "maxStored": 100,
@@ -1127,7 +1127,7 @@
     },
     {
       "id": 35,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 55.2040631273227,
       "maxStored": 100,
@@ -1159,7 +1159,7 @@
     },
     {
       "id": 36,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 82.94046642529949,
       "maxStored": 100,
@@ -1191,7 +1191,7 @@
     },
     {
       "id": 37,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 61.85197523642461,
       "maxStored": 100,
@@ -1223,7 +1223,7 @@
     },
     {
       "id": 38,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 86.17069003107773,
       "maxStored": 100,
@@ -1255,7 +1255,7 @@
     },
     {
       "id": 39,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 57.735214525676206,
       "maxStored": 100,
@@ -1287,7 +1287,7 @@
     },
     {
       "id": 40,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 70.45718362149235,
       "maxStored": 100,
@@ -1319,7 +1319,7 @@
     },
     {
       "id": 41,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 4.5824383655662215,
       "maxStored": 100,
@@ -1351,7 +1351,7 @@
     },
     {
       "id": 42,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 22.789827565154685,
       "maxStored": 100,
@@ -1383,7 +1383,7 @@
     },
     {
       "id": 43,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 28.938796360210716,
       "maxStored": 100,
@@ -1415,7 +1415,7 @@
     },
     {
       "id": 44,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 7.9791976923627495,
       "maxStored": 100,
@@ -1447,7 +1447,7 @@
     },
     {
       "id": 45,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 23.27908863610302,
       "maxStored": 100,
@@ -1479,7 +1479,7 @@
     },
     {
       "id": 46,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 10.100142940972912,
       "maxStored": 100,
@@ -1511,7 +1511,7 @@
     },
     {
       "id": 47,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 27.79736031100921,
       "maxStored": 100,
@@ -1543,7 +1543,7 @@
     },
     {
       "id": 48,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 63.56844442644002,
       "maxStored": 100,
@@ -1575,7 +1575,7 @@
     },
     {
       "id": 49,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 36.48321789700842,
       "maxStored": 100,
@@ -1607,7 +1607,7 @@
     },
     {
       "id": 50,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 37.018096711688266,
       "maxStored": 100,
@@ -1639,7 +1639,7 @@
     },
     {
       "id": 51,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 20.95070307714877,
       "maxStored": 100,
@@ -1671,7 +1671,7 @@
     },
     {
       "id": 52,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 26.697782204911334,
       "maxStored": 100,
@@ -1703,7 +1703,7 @@
     },
     {
       "id": 53,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 93.6654587712494,
       "maxStored": 100,
@@ -1735,7 +1735,7 @@
     },
     {
       "id": 54,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 64.80353852465936,
       "maxStored": 100,
@@ -1767,7 +1767,7 @@
     },
     {
       "id": 55,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 60.913100566698816,
       "maxStored": 100,
@@ -1799,7 +1799,7 @@
     },
     {
       "id": 56,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 17.1138648198097,
       "maxStored": 100,
@@ -1831,7 +1831,7 @@
     },
     {
       "id": 57,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 72.91267979503492,
       "maxStored": 100,
@@ -1863,7 +1863,7 @@
     },
     {
       "id": 58,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 16.34024937619284,
       "maxStored": 100,
@@ -1895,7 +1895,7 @@
     },
     {
       "id": 59,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 37.94554417576478,
       "maxStored": 100,
@@ -1927,7 +1927,7 @@
     },
     {
       "id": 60,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 98.95233506365952,
       "maxStored": 100,
@@ -1959,7 +1959,7 @@
     },
     {
       "id": 61,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 63.999975985409286,
       "maxStored": 100,
@@ -1991,7 +1991,7 @@
     },
     {
       "id": 62,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 55.694974377464625,
       "maxStored": 100,
@@ -2023,7 +2023,7 @@
     },
     {
       "id": 63,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 68.46142509898746,
       "maxStored": 100,
@@ -2055,7 +2055,7 @@
     },
     {
       "id": 64,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 84.28519201898096,
       "maxStored": 100,
@@ -2087,7 +2087,7 @@
     },
     {
       "id": 65,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 77.59999115462448,
       "maxStored": 100,
@@ -2119,7 +2119,7 @@
     },
     {
       "id": 66,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 22.904807196410438,
       "maxStored": 100,
@@ -2151,7 +2151,7 @@
     },
     {
       "id": 67,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 3.210024390403776,
       "maxStored": 100,
@@ -2183,7 +2183,7 @@
     },
     {
       "id": 68,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 31.54530480590819,
       "maxStored": 100,
@@ -2215,7 +2215,7 @@
     },
     {
       "id": 69,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 26.774087597570272,
       "maxStored": 100,
@@ -2247,7 +2247,7 @@
     },
     {
       "id": 70,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 21.098284358632647,
       "maxStored": 100,
@@ -2279,7 +2279,7 @@
     },
     {
       "id": 71,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 94.29097143350545,
       "maxStored": 100,
@@ -2311,7 +2311,7 @@
     },
     {
       "id": 72,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 87.63676264726689,
       "maxStored": 100,
@@ -2343,7 +2343,7 @@
     },
     {
       "id": 73,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 31.467788079847793,
       "maxStored": 100,
@@ -2375,7 +2375,7 @@
     },
     {
       "id": 74,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 65.543866529488,
       "maxStored": 100,
@@ -2407,7 +2407,7 @@
     },
     {
       "id": 75,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 39.56319010606643,
       "maxStored": 100,
@@ -2439,7 +2439,7 @@
     },
     {
       "id": 76,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 91.45475897405436,
       "maxStored": 100,
@@ -2471,7 +2471,7 @@
     },
     {
       "id": 77,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 45.88518525873988,
       "maxStored": 100,
@@ -2503,7 +2503,7 @@
     },
     {
       "id": 78,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 26.488016649805246,
       "maxStored": 100,
@@ -2535,7 +2535,7 @@
     },
     {
       "id": 79,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 24.662750769398343,
       "maxStored": 100,
@@ -2567,7 +2567,7 @@
     },
     {
       "id": 80,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 56.13681341631508,
       "maxStored": 100,
@@ -2599,7 +2599,7 @@
     },
     {
       "id": 81,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 26.274160852293527,
       "maxStored": 100,
@@ -2631,7 +2631,7 @@
     },
     {
       "id": 82,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 58.45859902235405,
       "maxStored": 100,
@@ -2663,7 +2663,7 @@
     },
     {
       "id": 83,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 89.78228836024769,
       "maxStored": 100,
@@ -2695,7 +2695,7 @@
     },
     {
       "id": 84,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 39.940050514039726,
       "maxStored": 100,
@@ -2727,7 +2727,7 @@
     },
     {
       "id": 85,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 21.932075915728333,
       "maxStored": 100,
@@ -2759,7 +2759,7 @@
     },
     {
       "id": 86,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 99.75376064951102,
       "maxStored": 100,
@@ -2791,7 +2791,7 @@
     },
     {
       "id": 87,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 50.95262936764645,
       "maxStored": 100,
@@ -2823,7 +2823,7 @@
     },
     {
       "id": 88,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 9.090941217379388,
       "maxStored": 100,
@@ -2855,7 +2855,7 @@
     },
     {
       "id": 89,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 4.711637542473457,
       "maxStored": 100,
@@ -2887,7 +2887,7 @@
     },
     {
       "id": 90,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 10.964913035065916,
       "maxStored": 100,
@@ -2919,7 +2919,7 @@
     },
     {
       "id": 91,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 62.744604170309,
       "maxStored": 100,
@@ -2951,7 +2951,7 @@
     },
     {
       "id": 92,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 79.20793643629641,
       "maxStored": 100,
@@ -2983,7 +2983,7 @@
     },
     {
       "id": 93,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 42.215996679968406,
       "maxStored": 100,
@@ -3015,7 +3015,7 @@
     },
     {
       "id": 94,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 6.352770615195713,
       "maxStored": 100,
@@ -3047,7 +3047,7 @@
     },
     {
       "id": 95,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 38.16192865065368,
       "maxStored": 100,
@@ -3079,7 +3079,7 @@
     },
     {
       "id": 96,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 99.61213802400968,
       "maxStored": 100,
@@ -3111,7 +3111,7 @@
     },
     {
       "id": 97,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 52.911434509913704,
       "maxStored": 100,
@@ -3143,7 +3143,7 @@
     },
     {
       "id": 98,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 97.10783776136182,
       "maxStored": 100,
@@ -3175,7 +3175,7 @@
     },
     {
       "id": 99,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 86.07797022344981,
       "maxStored": 100,
@@ -3207,7 +3207,7 @@
     },
     {
       "id": 100,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 1.1481021942819636,
       "maxStored": 100,
@@ -3239,7 +3239,7 @@
     },
     {
       "id": 101,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 72.07218193601946,
       "maxStored": 100,
@@ -3271,7 +3271,7 @@
     },
     {
       "id": 102,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 68.17103690265748,
       "maxStored": 100,
@@ -3303,7 +3303,7 @@
     },
     {
       "id": 103,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 53.69703304087952,
       "maxStored": 100,
@@ -3335,7 +3335,7 @@
     },
     {
       "id": 104,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 26.682518995254277,
       "maxStored": 100,
@@ -3367,7 +3367,7 @@
     },
     {
       "id": 105,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 64.0961798579808,
       "maxStored": 100,
@@ -3399,7 +3399,7 @@
     },
     {
       "id": 106,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 11.155217359587644,
       "maxStored": 100,
@@ -3431,7 +3431,7 @@
     },
     {
       "id": 107,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 43.4765250669105,
       "maxStored": 100,
@@ -3463,7 +3463,7 @@
     },
     {
       "id": 108,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 45.37237063292064,
       "maxStored": 100,
@@ -3495,7 +3495,7 @@
     },
     {
       "id": 109,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 95.38159275210802,
       "maxStored": 100,
@@ -3527,7 +3527,7 @@
     },
     {
       "id": 110,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 87.58529403781941,
       "maxStored": 100,
@@ -3559,7 +3559,7 @@
     },
     {
       "id": 111,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 26.338905075109075,
       "maxStored": 100,
@@ -3591,7 +3591,7 @@
     },
     {
       "id": 112,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 50.058611305029835,
       "maxStored": 100,
@@ -3623,7 +3623,7 @@
     },
     {
       "id": 113,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 17.865188053013135,
       "maxStored": 100,
@@ -3655,7 +3655,7 @@
     },
     {
       "id": 114,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 91.26278393448204,
       "maxStored": 100,
@@ -3687,7 +3687,7 @@
     },
     {
       "id": 115,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 87.05185698367669,
       "maxStored": 100,
@@ -3719,7 +3719,7 @@
     },
     {
       "id": 116,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 29.84447914486329,
       "maxStored": 100,
@@ -3751,7 +3751,7 @@
     },
     {
       "id": 117,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 63.89494948660052,
       "maxStored": 100,
@@ -3783,7 +3783,7 @@
     },
     {
       "id": 118,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 60.897021143817234,
       "maxStored": 100,
@@ -3815,7 +3815,7 @@
     },
     {
       "id": 119,
-      "chargeEfficieny": 1.0,
+      "chargeEfficiency": 1.0,
       "dischargeEfficiency": 1.0,
       "initialStored": 15.28392685496348,
       "maxStored": 100,
@@ -3844,6 +3844,56 @@
         0,
         0
       ]
+    }
+  ],
+  "gaParams": [
+    {
+      "id": "0.95 - 0.025",
+      "pop_size": 200,
+      "pc": 0.95,
+      "pm": 0.025,
+      "sel": "tournament",
+      "cros": "uniform",
+      "mp": false,
+      "mut": "flip",
+      "ss": false,
+      "ep": 25
+    },
+    {
+      "id": "0.75 - 0.025",
+      "pop_size": 200,
+      "pc": 0.75,
+      "pm": 0.025,
+      "sel": "tournament",
+      "cros": "uniform",
+      "mp": false,
+      "mut": "flip",
+      "ss": false,
+      "ep": 25
+    },
+    {
+      "id": "0.95 - 0.05",
+      "pop_size": 200,
+      "pc": 0.95,
+      "pm": 0.05,
+      "sel": "tournament",
+      "cros": "uniform",
+      "mp": false,
+      "mut": "flip",
+      "ss": false,
+      "ep": 25
+    },
+    {
+      "id": "0.75 - 0.05",
+      "pop_size": 200,
+      "pc": 0.75,
+      "pm": 0.05,
+      "sel": "tournament",
+      "cros": "uniform",
+      "mp": false,
+      "mut": "flip",
+      "ss": false,
+      "ep": 25
     }
   ]
 }

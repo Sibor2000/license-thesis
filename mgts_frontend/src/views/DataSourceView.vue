@@ -11,6 +11,9 @@
                 <h3>
                     Upload your own, pick one from the example scenarios or build your own.
                 </h3>
+                <h3>
+                    In case of not selecting GA parameters, default ones will be selected.
+                </h3>
             </div>
 
             <div class="nav-button-row">
@@ -50,6 +53,12 @@
                 <h4>Adjust parameters</h4>
                 <div class="button-row">
                     <div>
+                        <button @click="activeTab = -2"
+                            :class="['button-tertiary', { 'active-tab': activeTab === -2 }]">
+                            Genetic algorithm parameters
+                        </button>
+                    </div>
+                    <div>
                         <button @click="activeTab = -1"
                             :class="['button-tertiary', { 'active-tab': activeTab === -1 }]">
                             Simulation parameters
@@ -64,6 +73,7 @@
                 </div>
 
                 <div :key="dataSourceKey">
+                    <GAParamConfigurationForm v-if="activeTab === -2" v-model:ga-params="gaParamsList"/>
                     <SimulationConfigurationForm v-if="activeTab === -1" v-model:simulationDuration="simulationDuration"
                         v-model:nrOfMicrogrids="nrOfMicrogrids" v-model:sellThreshold="sellThreshold"
                         v-model:buyThreshold="buyThreshold" v-model:eMax="eMax" />
@@ -87,6 +97,7 @@
 <script>
 import MicrogridConfigurationForm from '@/components/configuration-forms/MicrogridConfigurationForm.vue'
 import SimulationConfigurationForm from '@/components/configuration-forms/SimulationConfigurationForm.vue'
+import GAParamConfigurationForm from '@/components/configuration-forms/GAParamConfigurationForm.vue'
 import Stepper from '@/components/Stepper.vue'
 import api from '@/services/api'
 
@@ -100,12 +111,13 @@ export default {
             tableData: null,
             microGridArray: [],
             nrOfMicrogrids: 0,
-            activeTab: -1,
+            activeTab: -2,
             simulationDuration: 0,
             sellThreshold: 100,
             buyThreshold: 0,
             eMax: 0,
             dataSourceKey: 0,
+            gaParamsList: []
         }
     },
     mounted() {
@@ -147,6 +159,7 @@ export default {
                 this.buyThreshold = Number(scenario.buyThreshold)
                 this.sellThreshold = Number(scenario.sellThreshold)
                 this.eMax = Number(scenario.eMax)
+                this.gaParamsList = scenario?.gaParams ?? [];
                 this.dataSourceKey += 1
             } catch (error) {
                 console.log("Cannot parse scenario")
@@ -177,7 +190,8 @@ export default {
                 simulationDuration: this.simulationDuration,
                 nrOfMicrogrids: this.nrOfMicrogrids,
                 eMax: this.eMax,
-                microgrids: this.microGridArray
+                microgrids: this.microGridArray,
+                ...(this.gaParamsList.length > 0 && { gaParams: this.gaParamsList })
             }
             console.log(simulationData)
         },
@@ -192,7 +206,8 @@ export default {
                 simulationDuration: this.simulationDuration,
                 nrOfMicrogrids: this.nrOfMicrogrids,
                 eMax: this.eMax,
-                microgrids: this.microGridArray
+                microgrids: this.microGridArray,
+                gaParams: this.gaParamsList
             }
 
             try {
@@ -210,6 +225,7 @@ export default {
     components: {
         MicrogridConfigurationForm,
         SimulationConfigurationForm,
+        GAParamConfigurationForm,
         Stepper
     },
     watch: {

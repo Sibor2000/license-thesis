@@ -18,13 +18,14 @@ for i in range(0, dove_count):
         Microgrid(
             id=i,
             max_stored_energy=100,
-            #initial_stored_energy=random.uniform(0, 100),
-            initial_stored_energy=100,
+            initial_stored_energy=random.uniform(0, 100),
+            #initial_stored_energy=100,
+            #sell_threshold=random.uniform(55, 75),
             sell_threshold=sell_threshold,
             buy_threshold=buy_threshold,
             role=[Role.DOVE],
-            produced_energy=[0]*100,
-            consumed_energy=[0]*100
+            produced_energy=[0]*10,
+            consumed_energy=[0]*10
         )
     )
 
@@ -35,13 +36,13 @@ for i in range(dove_count, dove_count + hawk_count):
         Microgrid(
             id=i,
             max_stored_energy=100,
-            #initial_stored_energy=random.uniform(0, 100),
-            initial_stored_energy=100,
+            initial_stored_energy=random.uniform(0, 100),
+            #initial_stored_energy=100,
             sell_threshold=sell_threshold,
             buy_threshold=buy_threshold,
             role=[Role.HAWK],
-            produced_energy=[0]*100,
-            consumed_energy=[0]*100
+            produced_energy=[0]*10,
+            consumed_energy=[0]*10
         )
     )
 
@@ -49,13 +50,13 @@ print("Hawks ready")
 
 mgn = MicrogridNetwork(microgrids=mgs)
 
-mgn.step_time()
+#mgn.step_time()
 #mgn.step_time()
 #mgn.step_time()
 #mgn.step_time()
 
 
-charts = True
+charts = False
 
 if charts:
     fig, axes = plt.subplots(2, 2, figsize=(12, 5))
@@ -81,3 +82,8 @@ if charts:
 
     plt.tight_layout()
     plt.show()
+
+
+#print(mgn.to_scenario_dict()["microgrids"][70:])
+
+mgn.save_scenario_json()

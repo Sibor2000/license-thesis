@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from .microgrid import MicrogridModel
+from .ga_params import GAParamsModel
 
 class SimulationModel(BaseModel):
     sellThreshold: float
@@ -8,3 +9,4 @@ class SimulationModel(BaseModel):
     nrOfMicrogrids: int
     eMax: float
     microgrids: list[MicrogridModel]
+    gaParams: list[GAParamsModel]

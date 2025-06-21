@@ -1,5 +1,6 @@
 from mgts.microgrid import Microgrid
 from mgts.microgrid import Trade
+from mgts.optimizer import GAParams
 from mealpy.evolutionary_based import GA
 from mealpy.utils.problem import Problem
 from mealpy.utils.agent import Agent
@@ -9,10 +10,10 @@ from mgts.simulation.constants import E_MAX_LINES, FLOAT_ROUNDING_DECIMALS
 import math
 import csv
 import json
-
+from dataclasses import asdict
 
 class MicrogridNetwork:
-    def __init__(self, microgrids: list[Microgrid] = None, e_max_lines=E_MAX_LINES):
+    def __init__(self, microgrids: list[Microgrid] = None, e_max_lines=E_MAX_LINES, ga_params:list[GAParams]=None):
         self.microgrids = microgrids if microgrids else []
         self.__time = 0
 
@@ -29,6 +30,17 @@ class MicrogridNetwork:
         self.models_runtimes: list[dict] = []
 
         self.__circumstance_and_decision = False
+
+        if ga_params is None:
+            self.ga_params = [
+                GAParams("0.95 - 0.025", 200, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 25),
+                GAParams("0.75 - 0.025", 200, 0.75, 0.025, "tournament", "uniform", False, "flip", False, 25),
+                GAParams("0.95 - 0.05", 200, 0.95, 0.05, "tournament", "uniform", False, "flip", False, 25),
+                GAParams("0.75 - 0.05", 200, 0.75, 0.05, "tournament", "uniform", False, "flip", False, 25)
+            ]
+        else:
+            self.ga_params = ga_params
+
 
     def update_current_moment(self):
         self.__time = len(self.microgrids[0].stored_energy)
@@ -237,7 +249,7 @@ class MicrogridNetwork:
 
         if custom_combos:
             combos = [
-                # TODO: calculate the best solutions params
+                # TODO: cut unused part here
                 (200, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 25),
                 (200, 0.75, 0.025, "tournament", "uniform", False, "flip", False, 25),
                 (200, 0.95, 0.050, "tournament", "uniform", False, "flip", False, 25),
@@ -272,6 +284,8 @@ class MicrogridNetwork:
                 for ep in epoch
             ]
 
+        combos = self.ga_params
+
         print(f"There are {len(combos)} param combos in total")
 
         best_fits = {}
@@ -284,8 +298,8 @@ class MicrogridNetwork:
         model2 = []
         best_agent: Agent = None
 
-        for pop, pc, pm, sel, cros, mp, mut, ss, ep in combos:
-            self.__circumstance_and_decision = ss
+        for combo in combos:
+            self.__circumstance_and_decision = combo.ss
 
             problem_dict = {
                 "bounds": FloatVar(
@@ -301,18 +315,18 @@ class MicrogridNetwork:
             }
 
             model2 = GA.BaseGA(
-                epoch=ep,
-                pop_size=pop,
-                pc=pc,
-                pm=pm,
-                mutation_multipoints=mp,
-                mut=mut,
-                selection=sel,
-                crossover=cros,
+                epoch=combo.ep,
+                pop_size=combo.pop_size,
+                pc=combo.pc,
+                pm=combo.pm,
+                mutation_multipoints=combo.mp,
+                mut=combo.mut,
+                selection=combo.sel,
+                crossover=combo.cros,
             )
             model2.solve(problem_dict)
 
-            model_id = f"{pop}-{pc}-{pm}-{mp}-{mut}-{sel}-{cros}-{ss}"
+            model_id = combo.id
 
             best_fits[model_id] = model2.history.list_global_best_fit
             diversities[model_id] = model2.history.list_diversity
@@ -328,12 +342,12 @@ class MicrogridNetwork:
             if csv_write:
                 csv_writer.writerow(
                     [
-                        pop,
-                        pc,
-                        pm,
-                        sel,
-                        cros,
-                        ss,
+                        combo.pop_size,
+                        combo.pc,
+                        combo.pm,
+                        combo.sel,
+                        combo.cros,
+                        combo.ss,
                         model2.g_best.target.fitness,
                         model2.history.list_diversity[-1],
                         model2.history.list_exploration[-1],
@@ -484,6 +498,9 @@ class MicrogridNetwork:
             "eMax": self.e_max_lines,
             "microgrids": [
                 microgrid.to_scenario_dict() for microgrid in self.microgrids
+            ],
+            "gaParams": [
+                asdict(ga_param_combo) for ga_param_combo in self.ga_params
             ],
         }
 
