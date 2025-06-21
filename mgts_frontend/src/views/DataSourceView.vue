@@ -49,6 +49,13 @@
                 Active option: {{ activeOption }}
             </div>
 
+            <div v-if="invalidInputs.length != 0" class="active-option">
+                Error
+                <div v-for="invalidInput in invalidInputs">
+                    {{ invalidInput }}
+                </div>
+            </div>
+
             <div class="param-zone">
                 <h4>Adjust parameters</h4>
                 <div class="button-row">
@@ -73,7 +80,7 @@
                 </div>
 
                 <div :key="dataSourceKey">
-                    <GAParamConfigurationForm v-if="activeTab === -2" v-model:ga-params="gaParamsList"/>
+                    <GAParamConfigurationForm v-if="activeTab === -2" v-model:ga-params="gaParamsList" />
                     <SimulationConfigurationForm v-if="activeTab === -1" v-model:simulationDuration="simulationDuration"
                         v-model:nrOfMicrogrids="nrOfMicrogrids" v-model:sellThreshold="sellThreshold"
                         v-model:buyThreshold="buyThreshold" v-model:eMax="eMax" />
@@ -117,7 +124,8 @@ export default {
             buyThreshold: 0,
             eMax: 0,
             dataSourceKey: 0,
-            gaParamsList: []
+            gaParamsList: [],
+            invalidInputs: []
         }
     },
     mounted() {
@@ -182,7 +190,119 @@ export default {
             this.placeScenarioObject(response.data)
             this.activeOption = "Previous state"
         },
+        validateInputs() {
+            let validInputs = true
+            this.invalidInputs = []
+
+            if (this.sellThreshold < this.buyThreshold) {
+                validInputs = false
+                this.invalidInputs.push("Sell threshold should be greater or equal to buy threshold")
+            }
+
+            if (this.sellThreshold < 0 || this.sellThreshold > 100) {
+                validInputs = false
+                this.invalidInputs.push("Invalid sell threshold")
+            }
+            if (this.buyThreshold < 0 || this.buyThreshold > 100) {
+                validInputs = false
+                this.invalidInputs.push("Invalid buy threshold")
+            }
+
+            if (this.simulationDuration < 1) {
+                validInputs = false
+                this.invalidInputs.push("Duration needs to be at least 1")
+            }
+            if (this.nrOfMicrogrids < 1) {
+                validInputs = false
+                this.invalidInputs.push("At least one microgrid needed")
+            }
+            if(this.eMax < 0){
+                validInputs = false
+                this.invalidInputs.push("Line capacity (eMax) needs to be at least 0")
+            }
+
+            if (!this.microGridArray.every(element => {
+                if (element.chargeEfficiency > 1 || element.chargeEfficiency < 0) {
+                    this.invalidInputs.push("Charge efficiencies needs to be between 0 and 1")
+                    return false
+                }
+
+                if (element.dischargeEfficiency > 1 || element.dischargeEfficiency < 0) {
+                    this.invalidInputs.push("Discharge efficiencies needs to be between 0 and 1")
+                    return false
+                }
+
+                if (element.maxStored <= 0) {
+                    this.invalidInputs.push("Max storage needs to be greater than 0")
+                    return false
+                }
+
+                if (element.initialStored < 0 || element.initialStored > element.maxStored) {
+                    this.invalidInputs.push("Initial storages needs to be between 0 and respective max storage")
+                    return false
+                }
+
+                if (
+                    element.consumption.length < this.simulationDuration ||
+                    !element.consumption.every(measurement => measurement != null && measurement !== '') ||
+                    element.production.length < this.simulationDuration ||
+                    !element.production.every(measurement => measurement != null && measurement !== '')
+                ) {
+                    this.invalidInputs.push("All measurements need to be filled")
+                    return false
+                }
+
+                if (
+                    !element.consumption.every(measurement => measurement >= 0) ||
+                    !element.production.every(measurement => measurement >= 0)
+                ) {
+                    this.invalidInputs.push("All measurements need to greater or equal to 0")
+                    return false
+                }
+
+                return true
+            })) {
+                validInputs = false
+            }
+
+            if(!this.gaParamsList.every(element=>{
+                if(element.id==null || element.id===''){
+                    this.invalidInputs.push("GA param id can't be empty")
+                    return false
+                }
+
+                if(element.pop_size < 20){
+                    this.invalidInputs.push("pop_size needs to be atleast 20")
+                    return false
+                }
+
+                if(element.pc < 0 || element.pc > 1){
+                    this.invalidInputs.push("pc needs to be between 0 and 1")
+                    return false
+                }
+
+                if(element.pm < 0 || element.pm > 1){
+                    this.invalidInputs.push("pm needs to be between 0 and 1")
+                    return false
+                }
+
+                if(element.epoch < 5){
+                    this.invalidInputs.push("At least 5 epochs are needed")
+                    return false
+                }
+
+            })){
+                validInputs = false
+            }
+
+            return validInputs
+        },
         async compileSimulationData() {
+
+            if (!this.validateInputs()) {
+                return
+            }
+
             const simulationData = {
                 id: this.$route.params.id,
                 sellThreshold: this.sellThreshold,
