@@ -12,8 +12,14 @@ import csv
 import json
 from dataclasses import asdict
 
+
 class MicrogridNetwork:
-    def __init__(self, microgrids: list[Microgrid] = None, e_max_lines=E_MAX_LINES, ga_params:list[GAParams]=None):
+    def __init__(
+        self,
+        microgrids: list[Microgrid] = None,
+        e_max_lines=E_MAX_LINES,
+        ga_params: list[GAParams] = None,
+    ):
         self.microgrids = microgrids if microgrids else []
         self.__time = 0
 
@@ -33,14 +39,57 @@ class MicrogridNetwork:
 
         if ga_params is None:
             self.ga_params = [
-                GAParams("0.95 - 0.025", 200, 0.95, 0.025, "tournament", "uniform", False, "flip", False, 25),
-                GAParams("0.75 - 0.025", 200, 0.75, 0.025, "tournament", "uniform", False, "flip", False, 25),
-                GAParams("0.95 - 0.05", 200, 0.95, 0.05, "tournament", "uniform", False, "flip", False, 25),
-                GAParams("0.75 - 0.05", 200, 0.75, 0.05, "tournament", "uniform", False, "flip", False, 25)
+                GAParams(
+                    "0.95 - 0.025",
+                    200,
+                    0.95,
+                    0.025,
+                    "tournament",
+                    "uniform",
+                    False,
+                    "flip",
+                    False,
+                    25,
+                ),
+                GAParams(
+                    "0.75 - 0.025",
+                    200,
+                    0.75,
+                    0.025,
+                    "tournament",
+                    "uniform",
+                    False,
+                    "flip",
+                    False,
+                    25,
+                ),
+                GAParams(
+                    "0.95 - 0.05",
+                    200,
+                    0.95,
+                    0.05,
+                    "tournament",
+                    "uniform",
+                    False,
+                    "flip",
+                    False,
+                    25,
+                ),
+                GAParams(
+                    "0.75 - 0.05",
+                    200,
+                    0.75,
+                    0.05,
+                    "tournament",
+                    "uniform",
+                    False,
+                    "flip",
+                    False,
+                    25,
+                ),
             ]
         else:
             self.ga_params = ga_params
-
 
     def update_current_moment(self):
         self.__time = len(self.microgrids[0].stored_energy)
@@ -207,11 +256,19 @@ class MicrogridNetwork:
         # print(f"stabilisation_bonus {stabilisation_bonus}")
 
         return (
-            -(
-                total_overhead_cost
-                + total_battery_cost
-                + (1.0 - stabilisation_bonus)
-                + (1.0 - variance_bonus)
+            # -(
+            #    total_overhead_cost
+            #    + total_battery_cost
+            #    + (1.0 - stabilisation_bonus)
+            #    + (1.0 - variance_bonus)
+            # )
+            # / 4.0
+            (
+                stabilisation_bonus
+                + variance_bonus
+                - 2.0
+                - total_overhead_cost
+                - total_battery_cost
             )
             / 4.0
         )
@@ -499,12 +556,10 @@ class MicrogridNetwork:
             "microgrids": [
                 microgrid.to_scenario_dict() for microgrid in self.microgrids
             ],
-            "gaParams": [
-                asdict(ga_param_combo) for ga_param_combo in self.ga_params
-            ],
+            "gaParams": [asdict(ga_param_combo) for ga_param_combo in self.ga_params],
         }
 
-    def to_scenario_json(self)->str:
+    def to_scenario_json(self) -> str:
         json.dumps(self.to_scenario_dict())
 
     def save_scenario_json(self, path="scenario.json"):
