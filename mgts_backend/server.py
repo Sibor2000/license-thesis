@@ -18,7 +18,6 @@ app = FastAPI()
 
 simulations:dict[str, MicrogridNetwork] = {}
 simulation_charts:dict[str, dict] = {}
-#simulation_charts["momentChartsList"] = []
 active_websockets: dict[str, WebSocket] = {}
 
 app.add_middleware(

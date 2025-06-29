@@ -3,29 +3,38 @@
         Sell threshold
     </label>
     <br />
-    <input type="number" min="0" max="100" @input="emitUpdateSellThreshold($event.target.valueAsNumber)" :value="sellThreshold"></input>
+    <input type="number" min="0" max="100"
+    @input="emitUpdateSellThreshold($event.target.valueAsNumber)"
+    :value="sellThreshold">
+    </input>
     <br />
 
     <label>
         Buy threshold
     </label>
     <br />
-    <input type="number" min="0" max="100" @input="emitUpdateBuyThreshold($event.target.valueAsNumber)" :value="buyThreshold"></input>
+    <input type="number" min="0" max="100"
+    @input="emitUpdateBuyThreshold($event.target.valueAsNumber)"
+    :value="buyThreshold"></input>
     <br />
 
     <label>
         Duration
     </label>
     <br />
-    <input type="number" @input="emitUpdateDuration($event.target.valueAsNumber)" :value="simulationDuration"
-        min="0"></input>
+    <input type="number"
+    @input="emitUpdateDuration($event.target.valueAsNumber)"
+    :value="simulationDuration"
+    min="0"></input>
     <br />
 
     <label>
         Number of Microgrids
     </label>
     <br />
-    <input type="number" @input="emitUpdateMicrogridNumber($event.target.valueAsNumber)" :value="nrOfMicrogrids"
+    <input type="number"
+    @input="emitUpdateMicrogridNumber($event.target.valueAsNumber)"
+    :value="nrOfMicrogrids"
         min="0"></input>
     <br />
 
@@ -33,7 +42,9 @@
         E Max
     </label>
     <br />
-    <input type="number" min="0" @input="emitUpdateEMax($event.target.valueAsNumber)"  :value="eMax"></input>
+    <input type="number" min="0"
+    @input="emitUpdateEMax($event.target.valueAsNumber)"
+    :value="eMax"></input>
     <br />
 </template>
 

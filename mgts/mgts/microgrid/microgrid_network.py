@@ -182,6 +182,7 @@ class MicrogridNetwork:
             if microgrid.is_stable(self.__time):
                 if not (stable_post_trade):
                     no_destabilised += 1
+                    raise Exception("DESTABILIZATION")
                 else:
                     pass
             else:

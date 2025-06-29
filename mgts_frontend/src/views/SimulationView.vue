@@ -40,7 +40,11 @@
                 {{ wsTextMessage }}
             </div>
 
-            <div class="config-zone">
+            <div v-if="!performingStep && simulationCharts.length===0">
+                No data currently. Press step time, to start simulation.
+            </div>
+
+            <div class="config-zone" v-else>
                 <div class="button-row">
                     <div>
                         <button @click="activeTab = -1"

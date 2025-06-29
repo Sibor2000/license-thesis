@@ -61,32 +61,40 @@
                 <div class="button-row">
                     <div>
                         <button @click="activeTab = -2"
-                            :class="['button-tertiary', { 'active-tab': activeTab === -2 }]">
+                            :class="['button-tertiary',
+                            { 'active-tab': activeTab === -2 }]">
                             Genetic algorithm parameters
                         </button>
                     </div>
                     <div>
                         <button @click="activeTab = -1"
-                            :class="['button-tertiary', { 'active-tab': activeTab === -1 }]">
+                            :class="['button-tertiary',
+                            { 'active-tab': activeTab === -1 }]">
                             Simulation parameters
                         </button>
                     </div>
                     <div v-for="index in nrOfMicrogrids">
                         <button @click="activeTab = index - 1"
-                            :class="['button-tertiary', { 'active-tab': activeTab === index - 1 }]">
+                            :class="['button-tertiary',
+                            { 'active-tab': activeTab === index - 1 }]">
                             {{ microGridArray?.[index - 1]?.id }}
                         </button>
                     </div>
                 </div>
 
                 <div :key="dataSourceKey">
-                    <GAParamConfigurationForm v-if="activeTab === -2" v-model:ga-params="gaParamsList" />
-                    <SimulationConfigurationForm v-if="activeTab === -1" v-model:simulationDuration="simulationDuration"
-                        v-model:nrOfMicrogrids="nrOfMicrogrids" v-model:sellThreshold="sellThreshold"
-                        v-model:buyThreshold="buyThreshold" v-model:eMax="eMax" />
+                    <GAParamConfigurationForm v-if="activeTab === -2"
+                        v-model:ga-params="gaParamsList" />
+                    <SimulationConfigurationForm v-if="activeTab === -1"
+                        v-model:simulationDuration="simulationDuration"
+                        v-model:nrOfMicrogrids="nrOfMicrogrids"
+                        v-model:sellThreshold="sellThreshold"
+                        v-model:buyThreshold="buyThreshold"
+                        v-model:eMax="eMax" />
                     <div v-for="index in nrOfMicrogrids">
                         <MicrogridConfigurationForm v-if="activeTab == index - 1"
-                            :simulation-duration="simulationDuration" v-model:micro-grid="microGridArray[index - 1]" />
+                            :simulation-duration="simulationDuration"
+                            v-model:micro-grid="microGridArray[index - 1]" />
                     </div>
                 </div>
             </div>
