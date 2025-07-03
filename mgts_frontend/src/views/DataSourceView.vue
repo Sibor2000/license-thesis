@@ -25,6 +25,13 @@
                 <button @click="submitAndRedirect" class="button">
                     Set & Next
                 </button>
+                <!--
+                <RouterLink :to="simulationRoute" v-if="existingSimulation">
+                    <button class="button">
+                        Next
+                    </button>
+                </RouterLink>
+                -->
             </div>
 
             <div class="load-preset-container">
@@ -115,6 +122,7 @@ import SimulationConfigurationForm from '@/components/configuration-forms/Simula
 import GAParamConfigurationForm from '@/components/configuration-forms/GAParamConfigurationForm.vue'
 import Stepper from '@/components/Stepper.vue'
 import api from '@/services/api'
+import { RouterLink } from 'vue-router'
 
 export default {
     data() {
@@ -133,7 +141,8 @@ export default {
             eMax: 0,
             dataSourceKey: 0,
             gaParamsList: [],
-            invalidInputs: []
+            invalidInputs: [],
+            existingSimulation: false
         }
     },
     mounted() {
@@ -192,9 +201,11 @@ export default {
             const response = await api.get(`/simulation/${this.$route.params.id}/params/json`)
 
             if (response.data === null) {
+                this.existingSimulation = false
                 return
             }
 
+            this.existingSimulation = true
             this.placeScenarioObject(response.data)
             this.activeOption = "Previous state"
         },
@@ -367,7 +378,12 @@ export default {
             }
         }
     },
-    props: ['id']
+    props: ['id'],
+    computed: {
+        simulationRoute() {
+            return "/simulation/"+this.$route.params.id
+        }
+    }
 }
 </script>
 

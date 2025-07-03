@@ -23,55 +23,63 @@
                 </RouterLink>
             </div>
 
-            <div class="sim-controll-button-row">
-                <button @click="stepTime()" class="button">
-                    Step time
-                </button>
+            <div v-if="validSimulation">
+                <div class="sim-controll-button-row">
+                    <button @click="stepTime()" class="button">
+                        Step time
+                    </button>
 
-                <button @click="resetSimulation" class="button">
-                    Reset simulation
-                </button>
-            </div>
-
-            <div class="loader" v-if="performingStep">
-            </div>
-
-            <div v-if="wsTextMessage">
-                {{ wsTextMessage }}
-            </div>
-
-            <div v-if="!performingStep && simulationCharts.length===0">
-                No data currently. Press step time, to start simulation.
-            </div>
-
-            <div class="config-zone" v-else>
-                <div class="button-row">
-                    <div>
-                        <button @click="activeTab = -1"
-                        :class="['button-tertiary', { 'active-tab': activeTab === -1 }]">
-                            Simulation
-                        </button>
-                    </div>
-
-                    <div v-for="(_, index) in momentChartsList">
-                        <button @click="activeTab = index"
-                        :class="['button-tertiary', { 'active-tab': activeTab === index }]">
-                            {{ index }}
-                        </button>
-                    </div>
+                    <button @click="resetSimulation" class="button">
+                        Reset simulation
+                    </button>
                 </div>
 
-                <div>
-                    <div v-if="activeTab === -1" class="chart-column">
-                        <img v-for="simChart in simulationCharts" :src="'data:image/png;base64,' + simChart" />
+                <div class="loader" v-if="performingStep">
+                </div>
+
+                <div v-if="wsTextMessage">
+                    {{ wsTextMessage }}
+                </div>
+
+                <div v-if="!performingStep && (simulationCharts.length === 0)">
+                    No data currently. Press step time, to start simulation.
+                </div>
+
+                <div class="config-zone" v-else>
+                    <div class="button-row">
+                        <div>
+                            <button @click="activeTab = -1"
+                                :class="['button-tertiary', { 'active-tab': activeTab === -1 }]">
+                                Simulation
+                            </button>
+                        </div>
+
+                        <div v-for="(_, index) in momentChartsList">
+                            <button @click="activeTab = index"
+                                :class="['button-tertiary', { 'active-tab': activeTab === index }]">
+                                {{ index }}
+                            </button>
+                        </div>
                     </div>
 
-                    <div v-for="(momentCharts, index) in momentChartsList">
-                        <div v-if="activeTab === index" class="chart-column">
-                            <img v-for="momentChart in momentCharts" :src="'data:image/png;base64,' + momentChart" />
+                    <div>
+                        <div v-if="activeTab === -1" class="chart-column">
+                            <img v-for="simChart in simulationCharts" :src="'data:image/png;base64,' + simChart" />
+                        </div>
+
+                        <div v-for="(momentCharts, index) in momentChartsList">
+                            <div v-if="activeTab === index" class="chart-column">
+                                <img v-for="momentChart in momentCharts"
+                                    :src="'data:image/png;base64,' + momentChart" />
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div v-else>
+                <h3>
+                    Invalid simulation, please go back to the configuraion
+                </h3>
             </div>
         </div>
     </div>
@@ -80,6 +88,7 @@
 
 <script>
 import Stepper from '@/components/Stepper.vue'
+import api from '@/services/api'
 import axios from 'axios'
 
 export default {
@@ -91,10 +100,17 @@ export default {
             momentChartsList: [],
             activeTab: -1,
             wsTextMessage: null,
-            performingStep: false
+            performingStep: false,
+            validSimulation: true
         }
     },
-    mounted() {
+    async mounted() {
+        const simExistence = await this.checkSimExistence()
+
+        if(!simExistence){
+            return
+        }
+
         this.socket = new WebSocket(`ws://localhost:8000/ws/simulation/${this.$route.params.id}`)
 
         this.socket.onopen = () => {
@@ -135,9 +151,8 @@ export default {
     methods: {
         async stepTime() {
             try {
-                this.performingStep=true
+                this.performingStep = true
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/step`)
-
 
                 console.log(response.data)
             } catch (error) {
@@ -164,6 +179,18 @@ export default {
                 this.simulationCharts = data.simulationCharts
             } catch (error) {
                 console.log(error)
+            }
+        },
+        async checkSimExistence() {
+            try {
+                const response = await api.get(`simulation/${this.$route.params.id}/check`)
+
+                return true
+            } catch (error) {
+                console.log(error)
+                this.validSimulation = false
+                this.wsTextMessage = "Simulation is invalid, please go back to configuration"
+                return false
             }
         }
     },
@@ -233,7 +260,7 @@ li {
     margin: 0.4rem 0;
 }
 
-.loader{
+.loader {
     border: 8px solid #f3f3f3;
     border-top: 8px solid #00d1ff;
     border-radius: 50%;
@@ -243,14 +270,18 @@ li {
     margin: auto;
 }
 
-@keyframes spin{
-    0% {transform: rotate(0deg);}
-    100% {transform: rotate(360deg);}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .active-tab {
     background-color: #2c7b84;
     color: #fff;
 }
-
 </style>

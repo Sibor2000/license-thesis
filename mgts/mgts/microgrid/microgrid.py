@@ -9,6 +9,7 @@ from mgts.behavior import Role, Strategy, get_str_from_role
 from mgts.exceptions import EndOfSimulationException
 import random
 
+
 class Microgrid:
     def __init__(
         self,
@@ -26,7 +27,7 @@ class Microgrid:
         buy_threshold=DEFAULT_BUY_THRESHOLD,
         role: list[Role] = [Role.DOVE],
         battery_operations: list = None,
-        e_max_lines: float = E_MAX_LINES
+        e_max_lines: float = E_MAX_LINES,
     ):
         self.id = id
 
@@ -47,14 +48,12 @@ class Microgrid:
         self.consumed_energy = consumed_energy if consumed_energy else []
         # self.production_uncertainty = production_uncertainty
         self.battery_operations = battery_operations if battery_operations else []
+        self.e_max_lines = e_max_lines
 
         #! Behavior related fields
         self.sell_threshold = sell_threshold
         self.buy_threshold = buy_threshold
         self.role = role
-
-        #! Misc internal fields
-        self.e_max_lines = e_max_lines
 
         #! Internal fields for resetting
         self.__reset_stored_energy = self.stored_energy.copy()
@@ -74,7 +73,7 @@ class Microgrid:
         else:
             previous_energy = self.stored_energy_post_trade[t - 1]
 
-        if t>=len(self.produced_energy) or t>=len(self.consumed_energy):
+        if t >= len(self.produced_energy) or t >= len(self.consumed_energy):
             raise EndOfSimulationException
 
         delta_energy = self.produced_energy[t] - self.consumed_energy[t]
@@ -99,7 +98,9 @@ class Microgrid:
     def is_stable(self, t, post_trade=False):
 
         if post_trade:
-            check_level = 100.0 * self.stored_energy_post_trade[t] / self.max_stored_energy
+            check_level = (
+                100.0 * self.stored_energy_post_trade[t] / self.max_stored_energy
+            )
         else:
             check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
 
@@ -108,8 +109,7 @@ class Microgrid:
 
         return False
 
-
-    def strategy(self, t)->Strategy:
+    def strategy(self, t) -> Strategy:
         check_level = 100.0 * self.stored_energy[t] / self.max_stored_energy
 
         if self.buy_threshold > check_level:
@@ -222,30 +222,35 @@ class Microgrid:
             )
         )
 
-    def calculate_dove_chance(self, t:int)->float:
-        battery_percent = (self.stored_energy_post_trade[t] / self.max_stored_energy) * 100
+    def calculate_dove_chance(self, t: int) -> float:
+        battery_percent = (
+            self.stored_energy_post_trade[t] / self.max_stored_energy
+        ) * 100
 
-        if(battery_percent <= self.sell_threshold and battery_percent >= self.buy_threshold):
+        if (
+            battery_percent <= self.sell_threshold
+            and battery_percent >= self.buy_threshold
+        ):
             return 1.0
 
-        if(self.buy_threshold==0 or self.sell_threshold==100):
+        if self.buy_threshold == 0 or self.sell_threshold == 100:
             return 0
 
-        if(battery_percent < self.buy_threshold):
-            return (1.0/self.buy_threshold) * battery_percent
+        if battery_percent < self.buy_threshold:
+            return (1.0 / self.buy_threshold) * battery_percent
 
-        if(battery_percent > self.sell_threshold):
-            return ((battery_percent - 100.0)/(self.sell_threshold-100.0))
+        if battery_percent > self.sell_threshold:
+            return (battery_percent - 100.0) / (self.sell_threshold - 100.0)
 
         return 0
 
-    def calculate_next_role(self , t):
-        #self.role.append(self.role.append(self.role[0]))
+    def calculate_next_role(self, t):
+        # self.role.append(self.role.append(self.role[0]))
 
-        #if self.role[-1]==Role.DOVE:
-            #self.role.append(Role.HAWK)
-        #else:
-            #self.role.append(Role.DOVE)
+        # if self.role[-1]==Role.DOVE:
+        # self.role.append(Role.HAWK)
+        # else:
+        # self.role.append(Role.DOVE)
 
         if random.random() < self.calculate_dove_chance(t):
             self.role.append(Role.DOVE)
@@ -268,12 +273,12 @@ class Microgrid:
 
     def to_scenario_dict(self):
         return {
-            "id":self.id,
-            "chargeEfficiency":self.charge_efficiency,
-            "dischargeEfficiency":self.discharge_efficiency,
-            "initialStored":self.initial_stored_energy,
-            "maxStored":self.max_stored_energy,
-            "initialRole":get_str_from_role(self.role[0]),
-            "production":self.produced_energy,
-            "consumption":self.consumed_energy
+            "id": self.id,
+            "chargeEfficiency": self.charge_efficiency,
+            "dischargeEfficiency": self.discharge_efficiency,
+            "initialStored": self.initial_stored_energy,
+            "maxStored": self.max_stored_energy,
+            "initialRole": get_str_from_role(self.role[0]),
+            "production": self.produced_energy,
+            "consumption": self.consumed_energy,
         }

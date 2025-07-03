@@ -12,12 +12,14 @@ from mgts.charting.mgn_charts import MicrogridNetworkCharts
 from mgts.microgrid import MicrogridNetworkFactory
 from mgts.exceptions import EndOfSimulationException
 import matplotlib.pyplot as plt
-
+from dict_manager import DictSaveManager
 
 app = FastAPI()
 
-simulations:dict[str, MicrogridNetwork] = {}
-simulation_charts:dict[str, dict] = {}
+store = DictSaveManager()
+
+#simulations:dict[str, MicrogridNetwork] = {}
+#simulation_charts:dict[str, dict] = {}
 active_websockets: dict[str, WebSocket] = {}
 
 app.add_middleware(
@@ -90,16 +92,19 @@ def create_simulation(sim: SimulationRequest):
 
     mgn = MicrogridNetworkFactory.create_from_dict(filtered_data)
 
-    simulations[id] = mgn
-    simulation_charts[id] = {}
-    simulation_charts[id]["momentChartsList"] = []
+    #simulations[id] = mgn
+    store.set("simulations", id, mgn)
+    #simulation_charts[id] = {}
+    #simulation_charts[id]["momentChartsList"] = []
+    store.set("simulation_charts", id, {"momentChartsList":[]})
 
     # print(filtered_data["microgrids"][0]['chargeEfficiency'])
 
     return mgn
 
 async def step_time_and_send_charts(sim_id:str):
-    mgn:MicrogridNetwork = simulations[sim_id]
+    #mgn:MicrogridNetwork = simulations[sim_id]
+    mgn:MicrogridNetwork = store.get("simulations", sim_id)
     ws:WebSocket = active_websockets[sim_id]
 
     try:
@@ -136,6 +141,8 @@ async def step_time_and_send_charts(sim_id:str):
     chart_ex_v_ex_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_exp_vs_exp)
     chart_runtime_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_runtime)
 
+    simulation_charts = store.get_dict("simulation_charts")
+
     simulation_charts[sim_id]["simulationCharts"]=[chart_en_delta_b64, chart_ro_st_b64]
     simulation_charts[sim_id]["momentChartsList"].append([
         chart_ro_st_b64,
@@ -144,6 +151,8 @@ async def step_time_and_send_charts(sim_id:str):
         chart_ex_v_ex_b64,
         chart_runtime_b64
     ])
+
+    store.save()
 
     await ws.send_json({
         "type":"charts",
@@ -162,8 +171,12 @@ async def step_time_and_send_charts(sim_id:str):
 
 @app.post("/simulation/{sim_id}/step")
 async def step_simulation_time(sim_id: str):
-    mgn = simulations[sim_id]
+    #mgn = simulations[sim_id]
+    mgn:MicrogridNetwork = store.get("simulations", sim_id)
     ws = active_websockets[sim_id]
+
+    if mgn is None:
+        return {"message":"Non existent simulation"}
 
     asyncio.create_task(step_time_and_send_charts(sim_id))
 
@@ -171,26 +184,43 @@ async def step_simulation_time(sim_id: str):
 
 @app.post("/simulation/{sim_id}/reset")
 def reset_sim(sim_id: str):
-    mgn = simulations[sim_id]
+    #mgn = simulations[sim_id]
+    mgn:MicrogridNetwork = store.get("simulations", sim_id)
 
     mgn.reset()
 
-    simulation_charts[sim_id] = {}
-    simulation_charts[sim_id]["momentChartsList"] = []
+    #simulation_charts[sim_id] = {}
+    #simulation_charts[sim_id]["momentChartsList"] = []
+    store.set("simulation_charts", sim_id, {"momentChartsList":[]})
+
+
+    store.save()
 
 @app.get("/simulation/{sim_id}/charts")
 def send_simulation_charts(sim_id: str):
-    if sim_id in simulation_charts:
-        return simulation_charts[sim_id]
+    #if sim_id in simulation_charts:
+    #    return simulation_charts[sim_id]
+
+    if sim_id in store.get_dict("simulation_charts"):
+        return store.get("simulation_charts", sim_id)
+
     return {}
 
 @app.get("/simulation/{sim_id}/params/json")
 def send_simulation_params(sim_id:str):
-    if sim_id in simulations:
-        return simulations[sim_id].to_scenario_dict()
+    #if sim_id in simulations:
+    #    return simulations[sim_id].to_scenario_dict()
+    if sim_id in store.get_dict("simulations"):
+        return store.get("simulations", sim_id).to_scenario_dict()
 
     return None
 
 @app.get('/active_simulation_ids')
 def active_simulation_ids():
-    return list(simulations.keys())
+    #return list(simulations.keys())
+    return list(store.get_dict("simulations").keys())
+
+@app.get('/simulation/{sim_id}/check')
+def check_sim_existence(sim_id:str):
+    if store.get("simulations",sim_id) is None:
+        raise HTTPException(status_code=404, detail="Simulation not found")
