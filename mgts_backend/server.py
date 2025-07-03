@@ -18,8 +18,6 @@ app = FastAPI()
 
 store = DictSaveManager()
 
-#simulations:dict[str, MicrogridNetwork] = {}
-#simulation_charts:dict[str, dict] = {}
 active_websockets: dict[str, WebSocket] = {}
 
 app.add_middleware(
@@ -42,12 +40,9 @@ async def ws_endpoint(websocket: WebSocket, sim_id: str):
 
     active_websockets[sim_id] = websocket
 
-    # await websocket.send_text(f"Connected {sim_id} to sim!")
-
     await websocket.send_json({"type": "msg", "text": f"Connected {sim_id} to sim!"})
 
     try:
-        # await websocket.receive_text()
         while True:
             await asyncio.sleep(1)
     except asyncio.CancelledError:
@@ -92,18 +87,12 @@ def create_simulation(sim: SimulationRequest):
 
     mgn = MicrogridNetworkFactory.create_from_dict(filtered_data)
 
-    #simulations[id] = mgn
     store.set("simulations", id, mgn)
-    #simulation_charts[id] = {}
-    #simulation_charts[id]["momentChartsList"] = []
     store.set("simulation_charts", id, {"momentChartsList":[]})
-
-    # print(filtered_data["microgrids"][0]['chargeEfficiency'])
 
     return mgn
 
 async def step_time_and_send_charts(sim_id:str):
-    #mgn:MicrogridNetwork = simulations[sim_id]
     mgn:MicrogridNetwork = store.get("simulations", sim_id)
     ws:WebSocket = active_websockets[sim_id]
 
@@ -171,7 +160,6 @@ async def step_time_and_send_charts(sim_id:str):
 
 @app.post("/simulation/{sim_id}/step")
 async def step_simulation_time(sim_id: str):
-    #mgn = simulations[sim_id]
     mgn:MicrogridNetwork = store.get("simulations", sim_id)
     ws = active_websockets[sim_id]
 
@@ -182,15 +170,92 @@ async def step_simulation_time(sim_id: str):
 
     return {"message":"OK"}
 
+async def step_time_repeat_and_send_charts(sim_id:str):
+    mgn:MicrogridNetwork = store.get("simulations", sim_id)
+    ws:WebSocket = active_websockets[sim_id]
+
+    try:
+        while True:
+            mgn.step_time()
+
+            #Sim charts
+            fig_energy_delta, axes_energy_delta = plt.subplots(1, 2)
+            fig_role_strat_progress, axes_role_strat_progress = plt.subplots()
+            MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes_energy_delta[0], axs_after=axes_energy_delta[1])
+            MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axes_role_strat_progress)
+            chart_en_delta_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_energy_delta)
+            chart_ro_st_ot_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_role_strat_progress)
+
+            #Moment charts
+            fig_role_strat, axes_role_strat = plt.subplots()
+            fig_glob_best_fit, axes_glob_best_fit = plt.subplots()
+            fig_diversity, axes_diversity = plt.subplots()
+            fig_exp_vs_exp, axes_exp_vs_exp = plt.subplots()
+            fig_runtime, axes_runtime = plt.subplots()
+            MicrogridNetworkCharts.chart_role_and_strategy(mgn, axes_role_strat)
+            MicrogridNetworkCharts.chart_global_best_fitness(mgn, axes_glob_best_fit)
+            MicrogridNetworkCharts.chart_diveristy(mgn, axes_diversity)
+            MicrogridNetworkCharts.chart_exploration_vs_exploitation(mgn, axes_exp_vs_exp)
+            MicrogridNetworkCharts.chart_runtime(mgn, axes_runtime)
+            chart_ro_st_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_role_strat)
+            chart_glob_bf_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_glob_best_fit)
+            chart_div_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_diversity)
+            chart_ex_v_ex_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_exp_vs_exp)
+            chart_runtime_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_runtime)
+
+            simulation_charts = store.get_dict("simulation_charts")
+
+            simulation_charts[sim_id]["simulationCharts"]=[chart_en_delta_b64, chart_ro_st_b64]
+            simulation_charts[sim_id]["momentChartsList"].append([
+                chart_ro_st_b64,
+                chart_glob_bf_b64,
+                chart_div_b64,
+                chart_ex_v_ex_b64,
+                chart_runtime_b64
+            ])
+
+            store.save()
+
+            await ws.send_json({
+                    "type":"continuousCharts",
+                    "simCharts":[
+                    chart_en_delta_b64,
+                    chart_ro_st_ot_b64
+                ],
+                "momentCharts":[
+                    chart_ro_st_b64,
+                    chart_glob_bf_b64,
+                    chart_div_b64,
+                    chart_ex_v_ex_b64,
+                    chart_runtime_b64
+                ]
+            })
+
+    except EndOfSimulationException:
+        await ws.send_json({
+            "type":"text",
+            "payload":"End of simulation has been reached"
+            })
+        return
+
+@app.post("/simulation/{sim_id}/step/repeat")
+async def step_simulation_time_repeat(sim_id:str):
+    mgn:MicrogridNetwork = store.get("simulations", sim_id)
+    ws = active_websockets[sim_id]
+
+    if mgn is None:
+        return {"message":"Non existent simulation"}
+
+    asyncio.create_task(step_time_repeat_and_send_charts(sim_id))
+
+    return {"message":"OK"}
+
 @app.post("/simulation/{sim_id}/reset")
 def reset_sim(sim_id: str):
-    #mgn = simulations[sim_id]
     mgn:MicrogridNetwork = store.get("simulations", sim_id)
 
     mgn.reset()
 
-    #simulation_charts[sim_id] = {}
-    #simulation_charts[sim_id]["momentChartsList"] = []
     store.set("simulation_charts", sim_id, {"momentChartsList":[]})
 
 
@@ -198,9 +263,6 @@ def reset_sim(sim_id: str):
 
 @app.get("/simulation/{sim_id}/charts")
 def send_simulation_charts(sim_id: str):
-    #if sim_id in simulation_charts:
-    #    return simulation_charts[sim_id]
-
     if sim_id in store.get_dict("simulation_charts"):
         return store.get("simulation_charts", sim_id)
 
@@ -208,8 +270,6 @@ def send_simulation_charts(sim_id: str):
 
 @app.get("/simulation/{sim_id}/params/json")
 def send_simulation_params(sim_id:str):
-    #if sim_id in simulations:
-    #    return simulations[sim_id].to_scenario_dict()
     if sim_id in store.get_dict("simulations"):
         return store.get("simulations", sim_id).to_scenario_dict()
 
@@ -217,7 +277,6 @@ def send_simulation_params(sim_id:str):
 
 @app.get('/active_simulation_ids')
 def active_simulation_ids():
-    #return list(simulations.keys())
     return list(store.get_dict("simulations").keys())
 
 @app.get('/simulation/{sim_id}/check')

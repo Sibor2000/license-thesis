@@ -29,6 +29,10 @@
                         Step time
                     </button>
 
+                    <button @click="stepTimeRepeat" class="button">
+                        Run until end
+                    </button>
+
                     <button @click="resetSimulation" class="button">
                         Reset simulation
                     </button>
@@ -120,16 +124,21 @@ export default {
         this.socket.onmessage = (event) => {
             const msg = JSON.parse(event.data)
 
-            this.performingStep = false
-
             if (msg.type === "charts") {
+                this.performingStep = false
                 this.simulationCharts = msg.simCharts
-
                 this.momentChartsList = this.momentChartsList.concat([msg.momentCharts])
             }
 
             if (msg.type === "text") {
+                this.performingStep = false
                 this.wsTextMessage = msg.payload
+            }
+
+            if(msg.type === "continuousCharts"){
+                this.performingStep = true
+                this.simulationCharts = msg.simCharts
+                this.momentChartsList = this.momentChartsList.concat([msg.momentCharts])
             }
         }
 
@@ -153,8 +162,14 @@ export default {
             try {
                 this.performingStep = true
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/step`)
-
-                console.log(response.data)
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async stepTimeRepeat(){
+            try {
+                this.performingStep = true
+                const response = await api.post(`simulation/${this.$route.params.id}/step/repeat`)
             } catch (error) {
                 console.log(error)
             }
