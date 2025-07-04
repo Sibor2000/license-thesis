@@ -25,13 +25,11 @@
                 <button @click="submitAndRedirect" class="button">
                     Set & Next
                 </button>
-                <!--
                 <RouterLink :to="simulationRoute" v-if="existingSimulation">
                     <button class="button">
                         Next
                     </button>
                 </RouterLink>
-                -->
             </div>
 
             <div class="load-preset-container">
