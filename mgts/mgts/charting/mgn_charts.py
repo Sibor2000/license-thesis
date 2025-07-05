@@ -6,10 +6,11 @@ from mgts.microgrid.microgrid_network import MicrogridNetwork
 import io
 import base64
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 
 class MicrogridNetworkCharts:
     def charts_energy_delta(mgn:MicrogridNetwork, axs_before, axs_after):
-        MicrogridNetworkCharts.check_time(mgn)
+        latest_time = MicrogridNetworkCharts.check_time(mgn)
 
         initial_energies = [
             mg.calculate_initial_battery_percentage() for mg in mgn.microgrids
@@ -36,7 +37,7 @@ class MicrogridNetworkCharts:
         axs_after.set_xlabel("Microgrid ids")
         axs_after.set_ylabel("Stored energy ratio")
         axs_after.set_ylim(0, 1)
-        axs_after.set_title("Post trade energies")
+        axs_after.set_title(f"Energy levels after moment {latest_time}")
         #axs_after.axhline(y=mgn.microgrids[0].sell_threshold/100.0, color='green', linestyle="--", linewidth=2, label="Sell threshold")
         #axs_after.axhline(y=mgn.microgrids[0].buy_threshold/100.0, color='red', linestyle="--", linewidth=2, label="Buy threshold")
 
@@ -159,6 +160,41 @@ class MicrogridNetworkCharts:
             (Role.HAWK, Strategy.STABLE): [],
         }
 
+        sim_time = mgn.get_current_moment()
+
+        for t in range(0, sim_time):
+            for rs, records in trade_counts.items():
+                records.append(0)
+
+            for mg in mgn.microgrids:
+                trade_counts[(mg.role[t], mg.strategy(t=t))][t] += 1
+
+        bar_width = 0.8/6
+        offsets = (np.arange(6) - 5.0/2) * bar_width
+
+        x= np.arange(sim_time)
+
+        for idx, ((role, strat), y) in enumerate(trade_counts.items()):
+            label = f"{role.name} {strat.name}"
+            axs.bar(x + offsets[idx], y, width=bar_width, label=label)
+
+        axs.legend(loc='best')
+        axs.set_title("Roles and strategies over time")
+        axs.set_xlabel("Time")
+        axs.set_xticks(x)
+        axs.set_ylabel("Amount of MGs")
+
+    def charts_roles_and_strategies_over_time_stacked(mgn:MicrogridNetwork, axs):
+        MicrogridNetworkCharts.check_time(mgn)
+        trade_counts = {
+            (Role.DOVE, Strategy.SELLER): [],
+            (Role.DOVE, Strategy.BUYER): [],
+            (Role.DOVE, Strategy.STABLE): [],
+            (Role.HAWK, Strategy.SELLER): [],
+            (Role.HAWK, Strategy.BUYER): [],
+            (Role.HAWK, Strategy.STABLE): [],
+        }
+
         for t in range(0, mgn.get_current_moment()):
             for rs, records in trade_counts.items():
                 records.append(0)
@@ -222,7 +258,7 @@ class MicrogridNetworkCharts:
 
             axs.plot(exploitations_value, label=f"Exploitation {key}")
 
-        axs.set_title(f"Exploration vs Exploitation for various hyperparameters")
+        axs.set_title(f"Exploration vs Exploitation at moment {t}")
         axs.set_xlabel("Epoch")
         axs.legend(loc='best')
 
@@ -238,8 +274,36 @@ class MicrogridNetworkCharts:
 
         axs.bar(models, runtimes, color='skyblue')
 
-        axs.set_title(f'Runtimes at moment {t}')
+        axs.set_title(f'Execution times at moment {t}')
         axs.set_ylabel("Time (s)")
+
+    def chart_stabilities_over_time(mgn: MicrogridNetwork, axs:Axes):
+        final_time = MicrogridNetworkCharts.check_time(mgn) + 1
+        pre_trade_stabilities = []
+        post_trade_stabilities = []
+        for t in range(0, final_time):
+            stable_count_pre_trade = 0
+            stable_count_post_trade = 0
+            for mg in mgn.microgrids:
+                if mg.is_stable(t=t, post_trade=True):
+                    stable_count_post_trade+=1
+                if mg.is_stable(t=t, post_trade=False):
+                    stable_count_pre_trade+=1
+
+            pre_trade_stabilities.append(stable_count_pre_trade)
+            post_trade_stabilities.append(stable_count_post_trade)
+
+        bar_width = 0.25
+        x= np.arange(final_time)
+        axs.bar(x-bar_width/2 ,pre_trade_stabilities, width=bar_width, label="Pre trade")
+        axs.bar(x+bar_width/2 ,post_trade_stabilities, width=bar_width, label="Post trade")
+
+        axs.set_title("Amount of stable microgrids over time")
+        axs.set_xlabel("Epoch")
+        axs.set_xticks(x)
+        axs.set_ylabel("Amount of MGs")
+        axs.legend(loc='best')
+
 
     def generate_img_from_fig(fig: plt.Figure):
         buf = io.BytesIO()

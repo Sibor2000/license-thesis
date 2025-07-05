@@ -15,9 +15,7 @@ import matplotlib.pyplot as plt
 from dict_manager import DictSaveManager
 
 app = FastAPI()
-
 store = DictSaveManager()
-
 active_websockets: dict[str, WebSocket] = {}
 
 app.add_middleware(
@@ -253,13 +251,8 @@ async def step_simulation_time_repeat(sim_id:str):
 @app.post("/simulation/{sim_id}/reset")
 def reset_sim(sim_id: str):
     mgn:MicrogridNetwork = store.get("simulations", sim_id)
-
     mgn.reset()
-
     store.set("simulation_charts", sim_id, {"momentChartsList":[]})
-
-
-    store.save()
 
 @app.get("/simulation/{sim_id}/charts")
 def send_simulation_charts(sim_id: str):
