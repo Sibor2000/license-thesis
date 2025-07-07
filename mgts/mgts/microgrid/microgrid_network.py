@@ -245,7 +245,7 @@ class MicrogridNetwork:
         )
 
         total_overhead_cost = self.total_overhead_cost(outcome=outcome)
-        #total_battery_cost = self.total_battery_cost(outcome=outcome)
+        total_battery_cost = self.total_battery_cost(outcome=outcome)
 
         # print(f"total_overhead_cost {total_overhead_cost}")
         # print(f"total_battery_cost {total_battery_cost}")
@@ -269,10 +269,10 @@ class MicrogridNetwork:
                 + variance_bonus
                 - 2.0
                 - total_overhead_cost
-                #- total_battery_cost
+                - total_battery_cost
             )
-            #/ 4.0
-            /3.0
+            / 4.0
+            #/3.0
         )
 
     def find_optimal_trade(self):

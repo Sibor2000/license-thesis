@@ -173,6 +173,46 @@ if charts:
     plt.show()
 
 
+mgn.step_time()
+
+if charts:
+    #fig, axes = plt.subplots(2, 2, figsize=(12, 5))
+
+    fig0, axes0 = plt.subplots(1, 1, figsize=(12, 5))
+    fig1, axes1 = plt.subplots(1, 1, figsize=(12, 5))
+    fig2, axes2 = plt.subplots(1, 1, figsize=(12, 5))
+    fig3, axes3 = plt.subplots(1, 1, figsize=(12, 5))
+    fig4, axes4 = plt.subplots(1, 1, figsize=(12, 5))
+    fig5, axes5 = plt.subplots(1, 1, figsize=(12, 5))
+    fig6, axes6 = plt.subplots(1, 1, figsize=(12, 5))
+    fig7, axes7 = plt.subplots(1, 1, figsize=(12, 5))
+    fig8, axes8 = plt.subplots(1, 1, figsize=(12, 5))
+    fig9, axes9 = plt.subplots(1, 1, figsize=(12, 5))
+
+    MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes0, axs_after=axes1)
+
+    MicrogridNetworkCharts.chart_role_and_strategy(mgn, axs=axes2, t=3)
+    MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axs=axes3)
+
+    #fig2, axes2 = plt.subplots(1, 2, figsize=(12, 5))
+
+    MicrogridNetworkCharts.chart_global_best_fitness(mgn=mgn, axs=axes4, t=3)
+    MicrogridNetworkCharts.chart_diveristy(mgn=mgn, axs=axes5, t=3)
+
+    #fig3, axes3 = plt.subplots(1, 2, figsize=(12, 5))
+
+    MicrogridNetworkCharts.chart_exploration_vs_exploitation(mgn=mgn, axs=axes6, t=3)
+    MicrogridNetworkCharts.chart_runtime(mgn=mgn, axs=axes7, t=3)
+
+    #fig4, axes4 = plt.subplots(1, 1, figsize=(12, 5))
+
+    MicrogridNetworkCharts.chart_stabilities_before_and_after_trade(mgn=mgn, axs=axes8)
+
+    MicrogridNetworkCharts.chart_stabilities_over_time(mgn=mgn, axs=axes9)
+
+    plt.tight_layout()
+    plt.show()
+
 #print(mgn.to_scenario_dict()["microgrids"][70:])
 
 #mgn.save_scenario_json()
