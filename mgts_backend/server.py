@@ -106,10 +106,13 @@ async def step_time_and_send_charts(sim_id:str):
     #Sim charts
     fig_energy_delta, axes_energy_delta = plt.subplots(1, 2)
     fig_role_strat_progress, axes_role_strat_progress = plt.subplots()
+    fig_stabilities_over_time, axes_stabilities_over_time = plt.subplots()
     MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes_energy_delta[0], axs_after=axes_energy_delta[1])
     MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axes_role_strat_progress)
+    MicrogridNetworkCharts.chart_stabilities_over_time(mgn, axes_stabilities_over_time)
     chart_en_delta_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_energy_delta)
     chart_ro_st_ot_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_role_strat_progress)
+    chart_stab_ot_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_stabilities_over_time)
 
     #Moment charts
     fig_role_strat, axes_role_strat = plt.subplots()
@@ -145,7 +148,8 @@ async def step_time_and_send_charts(sim_id:str):
         "type":"charts",
         "simCharts":[
             chart_en_delta_b64,
-            chart_ro_st_ot_b64
+            chart_ro_st_ot_b64,
+            chart_stab_ot_b64
         ],
         "momentCharts":[
             chart_ro_st_b64,
@@ -179,10 +183,13 @@ async def step_time_repeat_and_send_charts(sim_id:str):
             #Sim charts
             fig_energy_delta, axes_energy_delta = plt.subplots(1, 2)
             fig_role_strat_progress, axes_role_strat_progress = plt.subplots()
+            fig_stabilities_over_time, axes_stabilities_over_time = plt.subplots()
             MicrogridNetworkCharts.charts_energy_delta(mgn, axs_before=axes_energy_delta[0], axs_after=axes_energy_delta[1])
             MicrogridNetworkCharts.charts_roles_and_strategies_over_time(mgn, axes_role_strat_progress)
+            MicrogridNetworkCharts.chart_stabilities_over_time(mgn, axes_stabilities_over_time)
             chart_en_delta_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_energy_delta)
             chart_ro_st_ot_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_role_strat_progress)
+            chart_stab_ot_b64 = MicrogridNetworkCharts.generate_img_from_fig(fig_stabilities_over_time)
 
             #Moment charts
             fig_role_strat, axes_role_strat = plt.subplots()
@@ -218,7 +225,8 @@ async def step_time_repeat_and_send_charts(sim_id:str):
                     "type":"continuousCharts",
                     "simCharts":[
                     chart_en_delta_b64,
-                    chart_ro_st_ot_b64
+                    chart_ro_st_ot_b64,
+                    chart_stab_ot_b64
                 ],
                 "momentCharts":[
                     chart_ro_st_b64,
