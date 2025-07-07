@@ -2,7 +2,7 @@
   <div class="outer-container">
     <div class="content">
       <h1 class="title">⚡ Microgrid Trading System Simulator</h1>
-      <h3 class="subtitle">A thesis project by <span class="highlight">Sprencz Robert</span></h3>
+      <h3 class="subtitle">A thesis project by <span class="highlight">Sprencz Róbert</span></h3>
 
       <RouterLink to="/select_simulation">
         <button class="button">🚀 Let's Begin</button>
