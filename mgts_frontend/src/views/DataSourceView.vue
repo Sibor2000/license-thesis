@@ -4,17 +4,13 @@
 
             <Stepper :active-step="1" />
 
-            <div>
-                <h3>
-                    Adjust the parameters for the simulation and the optimizer.
-                </h3>
-                <h3>
-                    Upload your own, pick one from the example scenarios or build your own.
-                </h3>
-                <h3>
-                    In case of not selecting GA parameters, default ones will be selected.
-                </h3>
-            </div>
+            <h3 class="heading">
+                Adjust the parameters for the simulation and the optimizer.
+                <br />
+                Upload your own, pick one from the example scenarios or build your own.
+                <br />
+                In case of not selecting GA parameters, default ones will be selected.
+            </h3>
 
             <div class="nav-button-row">
                 <RouterLink to="/select_simulation">
@@ -34,10 +30,10 @@
 
             <div class="load-preset-container">
                 <div class="config-option">
-                    <input type="file" accept=".json" @change="handleFileUpload" />
+                    <input type="file" accept=".json" @change="handleFileUpload" class="scenario-source" />
                 </div>
                 <div class="config-option">
-                    <select v-model="selectedExampleConfig">
+                    <select v-model="selectedExampleConfig" class="scenario-source">
                         <option disabled value="">--Select a config--</option>
                         <option v-for="exampleConfig in exampleConfigs">
                             {{ exampleConfig }}
@@ -62,25 +58,22 @@
             </div>
 
             <div class="param-zone">
-                <h4>Adjust parameters</h4>
+                <h4 class="task-hint">Adjust parameters</h4>
                 <div class="button-row">
                     <div>
-                        <button @click="activeTab = -2"
-                            :class="['button-tertiary',
+                        <button @click="activeTab = -2" :class="['button-tertiary',
                             { 'active-tab': activeTab === -2 }]">
                             Genetic algorithm parameters
                         </button>
                     </div>
                     <div>
-                        <button @click="activeTab = -1"
-                            :class="['button-tertiary',
+                        <button @click="activeTab = -1" :class="['button-tertiary',
                             { 'active-tab': activeTab === -1 }]">
                             Simulation parameters
                         </button>
                     </div>
                     <div v-for="index in nrOfMicrogrids">
-                        <button @click="activeTab = index - 1"
-                            :class="['button-tertiary',
+                        <button @click="activeTab = index - 1" :class="['button-tertiary',
                             { 'active-tab': activeTab === index - 1 }]">
                             {{ microGridArray?.[index - 1]?.id }}
                         </button>
@@ -88,18 +81,13 @@
                 </div>
 
                 <div :key="dataSourceKey">
-                    <GAParamConfigurationForm v-if="activeTab === -2"
-                        v-model:ga-params="gaParamsList" />
-                    <SimulationConfigurationForm v-if="activeTab === -1"
-                        v-model:simulationDuration="simulationDuration"
-                        v-model:nrOfMicrogrids="nrOfMicrogrids"
-                        v-model:sellThreshold="sellThreshold"
-                        v-model:buyThreshold="buyThreshold"
-                        v-model:eMax="eMax" />
+                    <GAParamConfigurationForm v-if="activeTab === -2" v-model:ga-params="gaParamsList" />
+                    <SimulationConfigurationForm v-if="activeTab === -1" v-model:simulationDuration="simulationDuration"
+                        v-model:nrOfMicrogrids="nrOfMicrogrids" v-model:sellThreshold="sellThreshold"
+                        v-model:buyThreshold="buyThreshold" v-model:eMax="eMax" />
                     <div v-for="index in nrOfMicrogrids">
                         <MicrogridConfigurationForm v-if="activeTab == index - 1"
-                            :simulation-duration="simulationDuration"
-                            v-model:micro-grid="microGridArray[index - 1]" />
+                            :simulation-duration="simulationDuration" v-model:micro-grid="microGridArray[index - 1]" />
                     </div>
                 </div>
             </div>
@@ -233,7 +221,7 @@ export default {
                 validInputs = false
                 this.invalidInputs.push("At least one microgrid needed")
             }
-            if(this.eMax < 0){
+            if (this.eMax < 0) {
                 validInputs = false
                 this.invalidInputs.push("Line capacity (eMax) needs to be at least 0")
             }
@@ -282,33 +270,33 @@ export default {
                 validInputs = false
             }
 
-            if(!this.gaParamsList.every(element=>{
-                if(element.id==null || element.id===''){
+            if (!this.gaParamsList.every(element => {
+                if (element.id == null || element.id === '') {
                     this.invalidInputs.push("GA param id can't be empty")
                     return false
                 }
 
-                if(element.pop_size < 20){
+                if (element.pop_size < 20) {
                     this.invalidInputs.push("pop_size needs to be atleast 20")
                     return false
                 }
 
-                if(element.pc < 0 || element.pc > 1){
+                if (element.pc < 0 || element.pc > 1) {
                     this.invalidInputs.push("pc needs to be between 0 and 1")
                     return false
                 }
 
-                if(element.pm < 0 || element.pm > 1){
+                if (element.pm < 0 || element.pm > 1) {
                     this.invalidInputs.push("pm needs to be between 0 and 1")
                     return false
                 }
 
-                if(element.epoch < 5){
+                if (element.epoch < 5) {
                     this.invalidInputs.push("At least 5 epochs are needed")
                     return false
                 }
 
-            })){
+            })) {
                 validInputs = false
             }
 
@@ -379,7 +367,7 @@ export default {
     props: ['id'],
     computed: {
         simulationRoute() {
-            return "/simulation/"+this.$route.params.id
+            return "/simulation/" + this.$route.params.id
         }
     }
 }
@@ -402,8 +390,7 @@ export default {
     gap: 0.75rem;
 }
 
-input[type="file"],
-select {
+.scenario-source {
     background-color: #37474f;
     color: #fff;
     padding: 0.5rem;
@@ -439,5 +426,11 @@ select {
     text-align: center;
     font-weight: 500;
     color: #dbe4e2;
+}
+
+.task-hint {
+    font-size: 1.25rem;
+    margin: 0.3rem 0;
+    color: #e0f7fa;
 }
 </style>

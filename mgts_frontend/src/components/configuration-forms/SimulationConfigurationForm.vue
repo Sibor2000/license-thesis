@@ -3,7 +3,7 @@
         Sell threshold
     </label>
     <br />
-    <input type="number" min="0" max="100"
+    <input type="number" min="0" max="100" class="medium-input"
     @input="emitUpdateSellThreshold($event.target.valueAsNumber)"
     :value="sellThreshold">
     </input>
@@ -13,7 +13,7 @@
         Buy threshold
     </label>
     <br />
-    <input type="number" min="0" max="100"
+    <input type="number" min="0" max="100" class="medium-input"
     @input="emitUpdateBuyThreshold($event.target.valueAsNumber)"
     :value="buyThreshold"></input>
     <br />
@@ -22,7 +22,7 @@
         Duration
     </label>
     <br />
-    <input type="number"
+    <input type="number" class="medium-input"
     @input="emitUpdateDuration($event.target.valueAsNumber)"
     :value="simulationDuration"
     min="0"></input>
@@ -32,7 +32,7 @@
         Number of Microgrids
     </label>
     <br />
-    <input type="number"
+    <input type="number" class="medium-input"
     @input="emitUpdateMicrogridNumber($event.target.valueAsNumber)"
     :value="nrOfMicrogrids"
         min="0"></input>
@@ -42,7 +42,7 @@
         E Max
     </label>
     <br />
-    <input type="number" min="0"
+    <input type="number" min="0" class="medium-input"
     @input="emitUpdateEMax($event.target.valueAsNumber)"
     :value="eMax"></input>
     <br />
@@ -118,23 +118,6 @@ label {
   margin-top: 1rem;
   margin-bottom: 0.4rem;
   font-size: 0.95rem;
-}
-
-input[type="number"] {
-  background-color: #37474f;
-  border: none;
-  border-radius: 6px;
-  padding: 0.4rem 0.6rem;
-  color: white;
-  font-size: 1rem;
-  width: 100%;
-  max-width: 300px;
-  transition: background-color 0.2s ease;
-}
-
-input[type="number"]:focus {
-  outline: none;
-  background-color: #455a64;
 }
 
 br {

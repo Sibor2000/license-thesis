@@ -3,9 +3,10 @@
         <div class="inner-container">
             <Stepper :active-step="2" />
 
-            <h3>
-                Run the simulation by clicking 'Step time'. Check out chart to gain insight and reset simulation to
-                re-run.
+            <h3 class="heading">
+                Run the simulation by clicking 'Step time'.
+                <br/>
+                Check out chart to gain insight and reset simulation to re-run.
             </h3>
 
             <h4>On every time step, all the microgrids do the following:</h4>

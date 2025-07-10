@@ -6,24 +6,24 @@
                     <label>
                         Charge efficiency
                     </label>
-                    <input type="number" v-model.number="localMicroGridData.chargeEfficiency"></input>
+                    <input type="number" class="medium-input" v-model.number="localMicroGridData.chargeEfficiency"></input>
 
                     <label>
                         Discharge efficiency
                     </label>
-                    <input type="number" v-model.number="localMicroGridData.dischargeEfficiency"></input>
+                    <input type="number" class="medium-input" v-model.number="localMicroGridData.dischargeEfficiency"></input>
                 </div>
 
                 <div class="related-properties">
                     <label>
                         Initial stored
                     </label>
-                    <input type="number" v-model.number="localMicroGridData.initialStored"></input>
+                    <input type="number" class="medium-input" v-model.number="localMicroGridData.initialStored"></input>
 
                     <label>
                         Max stored
                     </label>
-                    <input type="number" v-model.number="localMicroGridData.maxStored"></input>
+                    <input type="number" class="medium-input" v-model.number="localMicroGridData.maxStored"></input>
                 </div>
             </div>
 
@@ -31,7 +31,7 @@
             <label>
                 Initial Role
             </label>
-            <select v-model="localMicroGridData.initialRole">
+            <select v-model="localMicroGridData.initialRole" class="medium-input">
                 <option>Hawk</option>
                 <option>Dove</option>
             </select>
@@ -132,23 +132,6 @@ export default {
     font-weight: 600;
     font-size: 0.95rem;
     color: #80deea;
-}
-
-.microgrid-stat-box input,
-.microgrid-stat-box select {
-    background-color: #37474f;
-    border: none;
-    border-radius: 6px;
-    padding: 0.4rem 0.6rem;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-}
-
-.microgrid-stat-box input:focus,
-.microgrid-stat-box select:focus {
-    outline: none;
-    background-color: #455a64;
 }
 
 .mg-properties {
