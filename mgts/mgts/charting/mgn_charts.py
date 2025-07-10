@@ -298,10 +298,10 @@ class MicrogridNetworkCharts:
         axs.bar(x-bar_width/2 ,pre_trade_stabilities, width=bar_width, label="Pre trade")
         axs.bar(x+bar_width/2 ,post_trade_stabilities, width=bar_width, label="Post trade")
 
-        axs.set_title("Amount of stable microgrids over time")
-        axs.set_xlabel("Epoch")
+        axs.set_title("Number of stable microgrids over time")
+        axs.set_xlabel("Time")
         axs.set_xticks(x)
-        axs.set_ylabel("Amount of MGs")
+        axs.set_ylabel("Number of MGs")
         axs.legend(loc='best')
 
 
