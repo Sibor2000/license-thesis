@@ -219,14 +219,6 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-h3,
-h4 {
-    color: #b2ebf2;
-    text-align: center;
-    margin: 0.5rem 0;
-    font-weight: 500;
-}
-
 .sim-controll-button-row {
     display: flex;
     justify-content: center;
@@ -293,10 +285,5 @@ li {
     100% {
         transform: rotate(360deg);
     }
-}
-
-.active-tab {
-    background-color: #2c7b84;
-    color: #fff;
 }
 </style>

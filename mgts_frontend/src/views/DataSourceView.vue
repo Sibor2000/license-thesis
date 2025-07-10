@@ -388,13 +388,6 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-h3 {
-    font-size: 1.25rem;
-    margin: 0.3rem 0;
-    text-align: center;
-    color: #e0f7fa;
-}
-
 .load-preset-container {
     display: flex;
     gap: 2rem;
@@ -445,12 +438,6 @@ select {
 .active-option {
     text-align: center;
     font-weight: 500;
-    color: #a7ffeb;
-}
-
-
-.active-tab {
-    background-color: #2c7b84;
-    color: #fff;
+    color: #dbe4e2;
 }
 </style>
