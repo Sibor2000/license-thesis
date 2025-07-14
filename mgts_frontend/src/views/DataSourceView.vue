@@ -94,11 +94,13 @@
 
         </div>
 
+        <!--
         <div>
             <button @click="compileSimulationData" class="button">
                 Compile
             </button>
         </div>
+        -->
     </div>
 </template>
 
