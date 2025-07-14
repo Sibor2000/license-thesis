@@ -179,6 +179,7 @@ export default {
             try {
                 const response = await axios.post(`http://localhost:8000/simulation/${this.$route.params.id}/reset`)
 
+                this.wsTextMessage = null
                 this.activeTab = -1
                 this.simulationCharts = []
                 this.momentChartsList = []
